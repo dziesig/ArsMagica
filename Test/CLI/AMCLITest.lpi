@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="10"/>
+    <General>
+      <Flags>
+        <MainUnitHasCreateFormStatements Value="False"/>
+        <MainUnitHasScaledStatement Value="False"/>
+      </Flags>
+      <SessionStorage Value="InProjectDir"/>
+      <MainUnit Value="0"/>
+      <Title Value="ArsMagicaCLITest"/>
+      <UseAppBundle Value="False"/>
+      <ResourceType Value="res"/>
+    </General>
+    <BuildModes Count="1">
+      <Item1 Name="Default" Default="True"/>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="1">
+      <Item1>
+        <PackageName Value="ArsMagicaCLI"/>
+      </Item1>
+    </RequiredPackages>
+    <Units Count="6">
+      <Unit0>
+        <Filename Value="AMCLITest.lpr"/>
+        <IsPartOfProject Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="amdatabasetest.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="AMDatabaseTest"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="ampersiststest.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="AMPersistsTest"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="amstringstest.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="AMStringsTest"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="amtextiotest.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="AMTextIOTest"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="amfsmtest.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="AMFSMTest"/>
+      </Unit5>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <Target>
+      <Filename Value="AMCLITest"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="5">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+      <Item4>
+        <Name Value="EConvertError"/>
+      </Item4>
+      <Item5>
+        <Name Value="Exception"/>
+      </Item5>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

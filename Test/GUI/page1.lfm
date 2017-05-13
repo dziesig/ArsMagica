@@ -1,0 +1,19 @@
+object Page1Form: TPage1Form
+  Left = 598
+  Height = 360
+  Top = 196
+  Width = 480
+  Caption = 'Page1Form'
+  ClientHeight = 360
+  ClientWidth = 480
+  DesignTimePPI = 144
+  LCLVersion = '1.9.0.0'
+  object Label1: TLabel
+    Left = 175
+    Height = 34
+    Top = 136
+    Width = 79
+    Caption = 'Page 1'
+    ParentColor = False
+  end
+end

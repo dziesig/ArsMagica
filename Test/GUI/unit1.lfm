@@ -1,0 +1,22 @@
+object Form1: TForm1
+  Left = 727
+  Height = 360
+  Top = 338
+  Width = 480
+  Caption = 'Form1'
+  ClientHeight = 360
+  ClientWidth = 480
+  DesignTimePPI = 144
+  LCLVersion = '1.9.0.0'
+  object AMFormPanel1: TAMFormPanel
+    Left = 72
+    Height = 210
+    Top = 48
+    Width = 300
+    Centering = fpcBoth
+  end
+  object AMHelpAbout1: TAMHelpAbout
+    left = 104
+    top = 296
+  end
+end

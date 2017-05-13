@@ -1,0 +1,16 @@
+inherited MainForm1: TMainForm1
+  Left = 655
+  Top = 236
+  ClientHeight = 702
+  inherited ToolBar1: TToolBar
+    inherited ToolButton5: TToolButton
+      Height = 33
+    end
+  end
+  inherited AMFormPanel1: TAMFormPanel
+    Height = 664
+  end
+  inherited StatusBar1: TStatusBar
+    Top = 700
+  end
+end

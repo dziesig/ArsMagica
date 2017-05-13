@@ -1,0 +1,5 @@
+0000000000000000000000000000000000000000 333acf6604f6047b0c968f63d17d62e8dada286f Donald R. Ziesig <donald@ziesig.org> 1493583424 -0400	commit (initial): Initial commit 2017-04-30
+333acf6604f6047b0c968f63d17d62e8dada286f a8b93c427f6c3f750746fc5b7b567811a1c07104 Donald R. Ziesig <donald@ziesig.org> 1494090518 -0400	merge amdataunit_to_ampersists: Fast-forward
+a8b93c427f6c3f750746fc5b7b567811a1c07104 9ac4492e2ee18839debeb419a9f8f92e21872be2 Donald R. Ziesig <donald@ziesig.org> 1494606203 -0400	commit: continued development 12 May 2017
+9ac4492e2ee18839debeb419a9f8f92e21872be2 9d2f2322fbe25b446baa6d6c3a4257164c8e3b83 Donald R. Ziesig <donald@ziesig.org> 1494705404 -0400	commit: preparing for restart with gitignore
+9d2f2322fbe25b446baa6d6c3a4257164c8e3b83 db351691a0fa58235c9d92bccb486053c01a4181 Donald R. Ziesig <donald@ziesig.org> 1494705458 -0400	commit: restart with new gitignore
