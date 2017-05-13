@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, SysUtils, AMTextIOTest, AMStringsTest, AMPersistsTest,
-  AMDatabaseTest, CustApp, AMFSMTest
+  AMDatabaseTest, CustApp, AMFSMTest, AM1dArrayTest, AM2dArrayTest, AMCompSci
   { you can add units after this };
 
 type
@@ -49,7 +49,9 @@ begin
   AMTextIOTest.DoTest;
   AMPersistsTest.DoTest;
   AMDatabaseTest.DoTest;
-  AMFSMTest.DoTest;
+  //AMFSMTest.DoTest;
+  AM1dArrayTest.DoTest;
+  AM2dArrayTest.DoTest;
   // stop program loop
   Terminate;
 end;
