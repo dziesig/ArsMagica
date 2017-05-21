@@ -4,7 +4,7 @@ object MainForm: TMainForm
   Top = 234
   Width = 1118
   Caption = 'MainForm'
-  ClientHeight = 702
+  ClientHeight = 742
   ClientWidth = 1118
   DesignTimePPI = 144
   Menu = MainMenu1
@@ -47,7 +47,7 @@ object MainForm: TMainForm
     end
     object ToolButton5: TToolButton
       Left = 141
-      Height = 33
+      Height = 8
       Top = 2
       Caption = 'ToolButton5'
       Style = tbsSeparator

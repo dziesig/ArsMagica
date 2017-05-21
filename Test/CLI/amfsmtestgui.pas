@@ -43,7 +43,7 @@ type
 
     property State : String read fState write SetState;
   public
-    FSM : TMealyStateMachine;
+    FSM : TFiniteStateMachine;
   end;
 
 var
@@ -63,34 +63,29 @@ uses
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  FSM := TMealyStateMachine.Create;
-  //FSM.Init( ['Inactive',
-  //           'South1',  'South2', 'South3',
-  //           'North1',  'North2', 'North3'],
-  //          ['SouthOn', 'SouthOff',
-  //           'NorthOn', 'NorthOff',
-  //           'Timeout'],
-  //          'Inactive' );
-  //FSM.Add('Inactive','SouthOn',  'South1');
-  //FSM.Add('South1',  'NorthOn',  'North2');
-  //FSM.Add('North2',  'SouthOff', 'North3');
-  //FSM.Add('North3',  'NorthOff', 'Inactive');
+  FSM := TFiniteStateMachine.Create;
+
+  //FSM.AddEvent(['South On', 'South Off', 'North On', 'North Off', 'Timeout'] );
+  //FSM.AddState(['South1', 'South2', 'South3','North1', 'North2', 'North3', 'Inactive']);
+  //FSM.SetTransition('Inactive','South On',  'South1');
+  //FSM.SetTransition('South1',  'North On',  'North2');
+  //FSM.SetTransition('North2',  'South Off', 'North3');
+  //FSM.SetTransition('North3',  'North Off', 'Inactive');
   //
-  //FSM.Add('Inactive','NorthOn','North1');
-  //FSM.Add('North1',  'SouthOn','South2');
-  //FSM.Add('South2',  'NorthOff','South3');
-  //FSM.Add('South3',  'SouthOff','Inactive');
-  //
+  //FSM.SetTransition('South3',  'South Off','Inactive');
+  //FSM.SetTransition('Inactive','North On','North1');
+  //FSM.SetTransition('North1',  'South On','South2');
+  //FSM.SetTransition('South2',  'North Off','South3');
+  //FSM.SetStartState('Inactive');
+
   ListBox1.Clear;
   ListBox2.Clear;
-  if FSM.TheStates <> nil then
-    ListBox1.Items := FSM.TheStates;
-  if FSM.TheEvents <> nil then
-    ListBox2.Items := FSM.TheEvents;
-  State := FSM.State;
+  if FSM.States <> nil then
+    ListBox1.Items := FSM.States;
+  if FSM.Events <> nil then
+    ListBox2.Items := FSM.Events;
 
-  Label3.Caption := Format( 'Index Count:  %d, IndexName[0]:  [%s]',
-                            [FSM.IndexCount, FSM.IndexName(0)] );
+  CurrentStateLabel.Caption := FSM.State;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -105,11 +100,11 @@ begin
   if Assigned( FSM ) then
     FreeAndNil( FSM );
   TextIO := TTextIO.Create('/home/donz/Desktop/FSM.txt',False);
-  FSM := TMealyStateMachine.Load( TextIO );
+  FSM := TFiniteStateMachine.Load( TextIO );
   TextIO.Free;
-  ListBox1.Items := FSM.TheStates;
-  ListBox2.Items := FSM.TheEvents;
-  State := FSM.State;
+  ListBox1.Items := FSM.States;
+  ListBox2.Items := FSM.Events;
+  CurrentStateLabel.Caption := FSM.State;
 end;
 
 procedure TForm1.MenuItem3Click(Sender: TObject);
@@ -129,9 +124,9 @@ end;
 procedure TForm1.NorthCheckBoxChange(Sender: TObject);
 begin
   if NorthCheckbox.Checked then
-    State := FSM.Event('NorthOn')
+    State := FSM.Event('North On')
   else
-    State := FSM.Event('NorthOff');
+    State := FSM.Event('North Off');
 end;
 
 procedure TForm1.SetState(AValue: String);
@@ -147,18 +142,15 @@ begin
     CrossingState := 'Inactive'
   else
     CrossingState := 'Active';
-  //else if (fState = 'South1') or (fState = 'North1' ) then
-  //  CrossingState := 'Active';
-
   CrossingStateLabel.Caption := CrossingState;
 end;
 
 procedure TForm1.SouthCheckBoxChange(Sender: TObject);
 begin
   if SouthCheckbox.Checked then
-    State := FSM.Event('SouthOn')
+    State := FSM.Event('South On')
   else
-    State := FSM.Event('SouthOff');
+    State := FSM.Event('South Off');
 end;
 
 end.

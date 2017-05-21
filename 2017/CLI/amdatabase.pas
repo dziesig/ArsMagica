@@ -90,10 +90,12 @@ type
   private
     function GetOwnsObjects : Boolean;
     function Seek( Id : Cardinal ) : Integer; override;
+    procedure Sort;
   public
     constructor Create( Idx : Integer = 0 );
 
     function Add( Item : TAMPersists ) : Integer; overload;
+    function Update( Item : TAMPersists ) : Integer;
 
     property OwnsObjects : Boolean read GetOwnsObjects;
 
@@ -127,6 +129,8 @@ type
       function Add( Item : T ) : Integer;
       function BOF : Boolean;
       function EOF : Boolean;
+      function Del( Item : T ) : Integer;
+      function Update( Item : T ) : Integer;
 
       function Current : T;
 
@@ -218,6 +222,16 @@ begin
     Result := T(TAMIndex( Indices.Objects[ fIndexIdx] ).Current)
   else
     Result := nil;
+end;
+
+function TAMTable.Del(Item : T) : Integer;
+var
+  I : Integer;
+begin
+  Item.OnModify := fOnItemChanged;
+  Result := TPrimaryIndex( Indices.Objects[0] ).Remove( Item );
+  for I := 1 to pred(Indices.Count) do
+    TSecondaryIndex( Indices.Objects[I] ).Remove( Item );
 end;
 
 //destructor TAMTable.Destroy;
@@ -373,6 +387,20 @@ begin
   Result := TAMIndex( Indices.Objects[fIndexIdx] ).SetRange( Low, High );
 end;
 
+function TAMTable.Update(Item : T) : Integer;
+var
+  I : Integer;
+begin
+  if Item.Id = 0 then
+    Add(Item)
+  else
+    begin
+      for I := 1 to pred(Indices.Count) do
+        TSecondaryIndex( Indices.Objects[I] ).Update( Item );
+    end;
+  Result := -1;
+end;
+
 procedure TAMTable.Write(TextIO: TTextIO);
 var
   I : Integer;
@@ -439,7 +467,7 @@ end;
 
 function TAMIndex.BOF: Boolean;
 begin
-  Result := vCurrentItem < vLow;
+  Result := (vCurrentItem < vLow) or (vCurrentItem < 0);
 end;
 
 procedure TAMIndex.ClearRange;
@@ -472,7 +500,7 @@ end;
 
 function TAMIndex.EOF: Boolean;
 begin
-  Result := vCurrentItem > vHigh;
+  Result := (vCurrentItem > vHigh) or (vCurrentItem < 0);
 end;
 
 function TAMIndex.Extract(Item: TAMPersists): TAMPersists;
@@ -562,12 +590,14 @@ end;
 function TAMIndex.Remove(Index: Integer): Integer;
 begin
   Result := inherited Remove( inherited Items[Index] );
+  ClearRange;
   vCurrentItem := -1; // Remove kills the ordering
 end;
 
 function TAMIndex.Remove(Item: TAMPersists): Integer;
 begin
   Result := inherited Remove( TObject( Item ) );
+  ClearRange;
   vCurrentItem := -1; // Remove kills the ordering
 end;
 
@@ -688,6 +718,50 @@ function TSecondaryIndex.Seek(Id: Cardinal): Integer;
 begin
   Result := Id;
   raise Exception.Create('TSecondaryIndex.Seek(Id: Cardinal) not implemented');
+end;
+
+procedure TSecondaryIndex.Sort;
+var
+  I, J : Integer;
+  Lowest, Highest : Integer;
+  Odd : Boolean;
+  Swap : Boolean;
+begin
+  Lowest := 0;
+  Highest := pred( Count );
+  Odd := False;
+  Swap := True;
+  while Swap do
+    begin
+      Swap := False;
+      if Odd then
+        begin
+          for I := pred(Highest) downto Lowest do
+            if Items[I].Compare( Items[I+1], vIndex ) < 0 then
+              begin
+                Exchange( I+1, I );
+                Swap := True;
+              end;
+        end
+      else
+        begin
+          for I := Lowest to pred(Highest) do
+            if Items[I].Compare( Items[I+1], vIndex ) < 0 then
+              begin
+                Exchange( I+1, I );
+                Swap := True;
+              end;
+        end;
+
+    end;
+
+end;
+
+function TSecondaryIndex.Update(Item : TAMPersists) : Integer;
+begin
+  ClearRange;
+  Sort;
+  Result := -1;
 end;
 
 end.

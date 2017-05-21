@@ -113,6 +113,9 @@ type
 
 implementation
 
+uses
+  Math;
+
 {==============================================================================}
 { Inheritance tests                                                            }
 {==============================================================================}
@@ -198,7 +201,13 @@ var
 begin
   H := Height;
   W := Width + 1;
-  SetLength( Data, Height, W );
+  if At > W then
+    W := At + 1;
+  //if H = 0 then
+  //  H := 1;
+  H := Max(H,1);
+  SetLength( Data, H, W );
+
   for I := 0 to pred( H ) do
     for J := pred( W ) downto At do
       Data[I,J] := Data[I,J-1];
@@ -214,11 +223,14 @@ var
 begin
   H := Height + 1;
   W := Width;
-  SetLength( Data, Height + 1, Width );
-  for I := pred(H) downto At do
-    for J := 0 to pred(Width) do
+  if At > H then
+    H := At + 1;
+  W := Max(W,1);
+  SetLength( Data, H, W );
+  for I := pred(H) downto succ(At) do
+    for J := 0 to pred( W ) do
       Data[I,J] := Data[I-1,J];
-  for J := 0 to pred(Width) do
+  for J := 0 to pred( W ) do
     Data[At,J] := Null;
 end;
 

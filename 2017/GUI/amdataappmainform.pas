@@ -104,7 +104,7 @@ const
 
 procedure TMainForm.ControlsToData;
 begin
-  if Assigned( AMFormPanel1.Form ) then
+  if Assigned( AMFormPanel1.Form ) and Assigned( AMFormPanel1.Form.OnHide ) then
     AMFormPanel1.Form.OnHide(nil);
 end;
 
@@ -217,7 +217,7 @@ begin
   if FileOk then
     begin
       ControlsToData;
-      if Assigned( AMFormPanel1.Form ) then
+      if Assigned( AMFormPanel1.Form.OnHide ) then
         AMFormPanel1.Form.OnHide(nil);
       Data.Save( FilePath )
     end
@@ -234,7 +234,8 @@ begin
         begin
           FilePath := SaveDialog1.FileName;
           ControlsToData;
-          if Assigned( AMFormPanel1.Form ) then
+          if Assigned( AMFormPanel1.Form ) and
+             Assigned( AMFormPanel1.Form.OnHide )  then
             AMFormPanel1.Form.OnHide(nil);
           Data.Save( FilePath );
         end;
@@ -319,7 +320,7 @@ end;
 function TMainForm.OnCreate: TAMData;
 begin
   raise Exception.Create('TMainForm.OnCreate called improperly');
-  //Result := TAMData.Create;
+  Result := TAMData.Create;
 end;
 
 procedure TMainForm.OnModify(Sender: TObject);
