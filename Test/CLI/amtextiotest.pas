@@ -35,6 +35,7 @@ begin
       Input.Writeln('Hello World');
       raise Exception.Create('Output to Input did NOT raise Exception');
     except on E : Exception do
+      Debug('Output to Input raised expected exception');
     end;
   finally
     Input.Free;

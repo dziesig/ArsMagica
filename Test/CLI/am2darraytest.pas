@@ -92,46 +92,55 @@ var
   W : String;
 begin
   Debug('Test Inserts');
-  Arr := TArray2d.Create( Height, Width, 99 );
-  for I := 0 to 3 do
-    for J := 0 to 4 do
-        Arr[I,J] := I*10 + J;
-  Arr.InsertCol( At );
-  //for I := 0 to pred(Arr.Height) do
-  //  for J := 0 to pred(Arr.Width) do
-  //    Debug('Arr[%d,%d]:  %d',[I,J,Arr[I,J]] );
-  E := Width  + 1;
-  A := Arr.Width;
-  W := 'InsertCol Arr.Width:  ';
-  if E <> A then
-    raise Exception.CreateFmt( '%s %d, expected:  %d',
-                               [W,A,E] );
-  for I := 0 to pred(Arr.Height) do
-    begin
-      E := 99;
-      A := Arr[I,At];
-      W := Format('InsertCol Data[%d]:',[At]);
-      if A <> E then
-        raise Exception.CreateFmt( '%s %d, expected %d',[ W,A,E] );
-    end;
+  try
+    Arr := TArray2d.Create( Height, Width, 99 );
+    for I := 0 to 3 do
+      for J := 0 to 4 do
+          Arr[I,J] := I*10 + J;
+    Arr.InsertCol( At );
+    Debug('Inserted Column at 2');
+    for I := 0 to pred(Arr.Height) do
+      for J := 0 to pred(Arr.Width) do
+        Debug('Arr[%d,%d]:  %d',[I,J,Arr[I,J]] );
+    E := Width  + 1;
+    A := Arr.Width;
+    W := 'InsertCol Arr.Width:  ';
+    if E <> A then
+      raise Exception.CreateFmt( '%s %d, expected:  %d',
+                                 [W,A,E] );
+    for I := 0 to pred(Arr.Height) do
+      begin
+        E := 99;
+        A := Arr[I,At];
+        W := Format('InsertCol Data[%d]:',[At]);
+        if A <> E then
+          raise Exception.CreateFmt( '%s %d, expected %d',[ W,A,E] );
+      end;
 
-  Arr.Free;
-  Arr := TArray2d.Create( Height, Width, 99 );
-  for I := 0 to 3 do
-    for J := 0 to 4 do
-        Arr[I,J] := I*10 + J;
-  Arr.InsertRow( At );
-  //for I := 0 to pred(Arr.Height) do
-  //  for J := 0 to pred(Arr.Width) do
-  //    Debug('Arr[%d,%d]:  %d',[I,J,Arr[I,J]] );
-  E := 99;
-  for J := 0 to pred(Arr.Width) do
-    begin
-      A := Arr[At,J];
-      W := Format( 'Arr[%d,%d]: ',[At,J]);
-      if A <> E then
-        raise Exception.CreateFmt( '%s  %d, expected %d',[W,A,E]);
-    end;
+  finally
+    Arr.Free;
+  end;
+  try
+    Arr := TArray2d.Create( Height, Width, 99 );
+    for I := 0 to 3 do
+      for J := 0 to 4 do
+          Arr[I,J] := I*10 + J;
+    Arr.InsertRow( At );
+    for I := 0 to pred(Arr.Height) do
+      for J := 0 to pred(Arr.Width) do
+        Debug('Arr[%d,%d]:  %d',[I,J,Arr[I,J]] );
+    E := 99;
+    for J := 0 to pred(Arr.Width) do
+      begin
+        A := Arr[At,J];
+        W := Format( 'Arr[%d,%d]: ',[At,J]);
+        if A <> E then
+          raise Exception.CreateFmt( '%s  %d, expected %d',[W,A,E]);
+      end;
+
+  finally
+    Arr.Free;
+  end;
   Debug('Test Inserts passed');
 end;
 
@@ -149,52 +158,59 @@ var
   NewSize : Integer;
 begin
   Debug('Test Deletes');
-  Arr := TArray2d.Create( Height, Width, 99 );
-  for I := 0 to 3 do
-    for J := 0 to 4 do
-        Arr[I,J] := I*10 + J;
-  NewSize := Arr.DeleteCol( At );
-  A := NewSize;
-  E := Width - 1;
-  W := 'DeleteCol width:';
-  if A <> E then
-    raise Exception.CreateFmt('%s  %d, expected %d',[W,A,E]);
-  for I := 0 to pred(Arr.Height) do
-    for J := 0 to pred(Arr.Width) do
-      Debug('Arr[%d,%d]:  %d',[I,J,Arr[I,J]] );
-  E := Width  - 1;
-  A := Arr.Width;
-  W := 'DeleteCol Arr.Width:  ';
-  if E <> A then
-    raise Exception.CreateFmt( '%s %d, expected:  %d',
-                               [W,A,E] );
-  //for I := 0 to pred(Arr.Height) do
-  //  begin
-  //    E := 99;
-  //    A := Arr[I,At];
-  //    W := Format('InsertCol Data[%d]:',[At]);
-  //    if A <> E then
-  //      raise Exception.CreateFmt( '%s %d, expected %d',[ W,A,E] );
-  //  end;
-  //
-  Arr.Free;
-  Debug('Delete Row');
-  Arr := TArray2d.Create( Height, Width, 99 );
-  for I := 0 to 3 do
-    for J := 0 to 4 do
-        Arr[I,J] := I*10 + J;
-  NewSize := Arr.DeleteRow( At );
-  for I := 0 to pred(Arr.Height) do
-    for J := 0 to pred(Arr.Width) do
-      Debug('Arr[%d,%d]:  %d',[I,J,Arr[I,J]] );
-  //E := 99;
-  //for J := 0 to pred(Arr.Width) do
-  //  begin
-  //    A := Arr[At,J];
-  //    W := Format( 'Arr[%d,%d]: ',[At,J]);
-  //    if A <> E then
-  //      raise Exception.CreateFmt( '%s  %d, expected %d',[W,A,E]);
-  //  end;
+  try
+    Arr := TArray2d.Create( Height, Width, 99 );
+    for I := 0 to 3 do
+      for J := 0 to 4 do
+          Arr[I,J] := I*10 + J;
+    NewSize := Arr.DeleteCol( At );
+    A := NewSize;
+    E := Width - 1;
+    W := 'DeleteCol width:';
+    if A <> E then
+      raise Exception.CreateFmt('%s  %d, expected %d',[W,A,E]);
+    for I := 0 to pred(Arr.Height) do
+      for J := 0 to pred(Arr.Width) do
+        Debug('Arr[%d,%d]:  %d',[I,J,Arr[I,J]] );
+    E := Width  - 1;
+    A := Arr.Width;
+    W := 'DeleteCol Arr.Width:  ';
+    if E <> A then
+      raise Exception.CreateFmt( '%s %d, expected:  %d',
+                                 [W,A,E] );
+    //for I := 0 to pred(Arr.Height) do
+    //  begin
+    //    E := 99;
+    //    A := Arr[I,At];
+    //    W := Format('InsertCol Data[%d]:',[At]);
+    //    if A <> E then
+    //      raise Exception.CreateFmt( '%s %d, expected %d',[ W,A,E] );
+    //  end;
+    //
+  finally
+    Arr.Free;
+  end;
+  try
+    Debug('Delete Row');
+    Arr := TArray2d.Create( Height, Width, 99 );
+    for I := 0 to 3 do
+      for J := 0 to 4 do
+          Arr[I,J] := I*10 + J;
+    NewSize := Arr.DeleteRow( At );
+    for I := 0 to pred(Arr.Height) do
+      for J := 0 to pred(Arr.Width) do
+        Debug('Arr[%d,%d]:  %d',[I,J,Arr[I,J]] );
+    //E := 99;
+    //for J := 0 to pred(Arr.Width) do
+    //  begin
+    //    A := Arr[At,J];
+    //    W := Format( 'Arr[%d,%d]: ',[At,J]);
+    //    if A <> E then
+    //      raise Exception.CreateFmt( '%s  %d, expected %d',[W,A,E]);
+    //  end;
+  finally
+    Arr.Free;
+  end;
   Debug('Test Deletes passed');
 end;
 

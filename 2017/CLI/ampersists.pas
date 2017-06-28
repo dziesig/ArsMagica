@@ -244,7 +244,7 @@ end;
 procedure TAMPersists.SetOnModify(AValue : TNotifyEvent);
 begin
   fOnModify := AValue;
-  Debug('TAMPersists.SetOnModify');
+  //Debug('TAMPersists.SetOnModify');
 end;
 
 procedure TAMPersists.Store(TextIO: TTextIO);

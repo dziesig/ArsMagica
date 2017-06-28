@@ -46,6 +46,85 @@ type
 
   TTable = specialize TAMTable<TTestIndexItem>;
 
+  { TTestRangeItem }
+
+  TTestRangeItem = class( TAMPersists )
+  private
+    const
+      TheVersion = 1;
+      fIndexCount = 2;
+      fIndexName : array[1..fIndexCount] of String =
+        ('Numbers','Letters');
+    var
+    fLetters : String;
+    fNumber  : Integer;
+  public
+    constructor Create( aParent : TAMPersists = nil ); override;
+    function Compare( Item : TAMPersists; anIndex : Integer ) : Integer; override;
+    function GetIndexName(Idx : Integer): String; override;
+
+    property Letters : String read fLetters write fLetters;
+    property Number  : Integer read fNumber write fNumber;
+
+    class function IndexCount : Integer; override;
+    class function IndexName( Idx : Integer ) : String; override;
+
+    //procedure Read( TextIO : TTextIO; aVersion : Integer ); override;
+    //procedure Write( TextIO : TTextIO ); override;
+
+
+  end;
+
+  TRangeTable = specialize TAMTable<TTestRangeItem>;
+
+{ TTestRangeItem }
+
+constructor TTestRangeItem.Create(aParent : TAMPersists);
+begin
+  inherited Create(aParent);
+  fVersion := TheVersion;
+end;
+
+function TTestRangeItem.Compare(Item : TAMPersists; anIndex : Integer
+  ) : Integer;
+var
+  anItem : TTestRangeItem;
+begin
+  anItem := TTestRangeItem( Item );
+  case anIndex of
+    0 : Result := inherited;
+    1 : Result := -Self.Number + anItem.Number;
+    2 :
+      begin
+        if Self.Letters > anItem.Letters then
+          Result := 1
+        else if Self.Letters < anItem.Letters then
+          Result := -1
+        else
+          Result := 0;
+      end;
+  end;
+  //Result := inherited Compare(Item, anIndex);
+end;
+
+function TTestRangeItem.GetIndexName(Idx : Integer) : String;
+begin
+  Result := inherited GetIndexName(Idx);
+end;
+
+class function TTestRangeItem.IndexCount : Integer;
+begin
+  Result := inherited IndexCount;
+end;
+
+class function TTestRangeItem.IndexName(Idx : Integer) : String;
+begin
+  if Idx < 1 then
+    Result := inherited
+  else
+    Result := fIndexName[Idx];
+end;
+
 constructor TTestIndexItem.Create(aParent: TAMPersists);
 begin
   inherited Create(aParent);
@@ -873,50 +952,134 @@ begin
 
 end; // TestStoreLoadIndices
 
+procedure TestRanges;
+var
+  ATable : TRangeTable;
+  anItem0, anItem1, anItem2 : TTestRangeItem;
+  I      : Integer;
+  Letters, Numbers : String;
+  E, A, T : String; // expected, actual, Test
+begin
+  Letters := 'QWERTYUIOPQWERTYUIOP';
+  Numbers := '31415926644662980077';
+  ATable := TRangeTable.Create;
+  try
+    for I := 0 to pred( Length( Letters ) ) do
+      begin
+        anItem0 := TTestRangeItem.Create;
+        anItem0.Letters := Letters[1];
+        anItem0.Number := StrToInt( Numbers[1] );
+        Debug('Adding %d %s',[anItem0.Number, anItem0.Letters] );
+        Letters := Copy(Letters,2,pred(Length(Letters)));
+        Numbers := Copy(Numbers,2,pred(Length(Numbers)));
+        ATable.Add( anItem0 );
+      end;
+    ATable.Index := 'Numbers';
+    Debug('Numbered');
+    ATable.First;
+    while not ATable.EOF do
+      begin
+        anItem0 := ATable.Current;
+        Debug('%.2d %2.d %s',[anItem0.Id,AnItem0.Number, anItem0.Letters]);
+        ATable.Next;
+      end;
+    ATable.Index := 'Numbers';
+    anItem1 := TTestRangeItem.Create;
+    anItem1.Number := -3;
+    anItem2 := TTestRangeItem.Create;
+    anItem2.Number := 2;
+    Debug('Number range: %d..%d',[anItem1.Number,anItem2.Number]);
+    ATable.SetRange( anItem1, anItem2 );
+    ATable.First;
+    while not ATable.EOF do
+      begin
+        anItem0 := ATable.Current;
+        Debug('%.2d %.2d %s',[anItem0.Id,AnItem0.Number, anItem0.Letters] );
+        ATable.Next;
+      end;
+    Debug('End of Number range: %d..%d',[anItem1.Number,anItem2.Number]);
+
+    anItem1.Number := 2;
+    //anItem2 := TTestRangeItem.Create;
+    anItem2.Number := 4;
+    ATable.SetRange( anItem1, anItem2 );
+
+   anItem0 := ATable.First;
+    T := 'First in Range';
+    E := 'U';
+    A := anItem0.Letters;
+    if A <> E then
+      raise Exception.CreateFMT('%s:  got [%s], expected [%s]',[T,A,E]);
+
+    anItem0 := ATable.Last;
+    T := 'Last in Range';
+    E := 'Q';
+    A := anItem0.Letters;
+    if A <> E then
+      raise Exception.CreateFMT('%s:  got [%s], expected [%s]',[T,A,E]);
+
+    Debug('Last .. Prev');
+    ATable.Last;
+    while not ATable.BOF do
+      begin
+        anItem0 := ATable.Current;
+        Debug('%.2d %2.d %s',[anItem0.Id,AnItem0.Number, anItem0.Letters]);
+        ATable.Prev;
+      end;
+    anItem1.Free;
+    anItem2.Free;
+  finally
+    ATable.Free;
+  end;
+end;
+
 procedure DoTest;
 begin
-  Debug('TestCreateFreePrimary');
-  TestCreateFreePrimary;
-  Debug('TestCreateFreePrimary passed');
-  Debug('TestIndexOfItem');
-  TestIndexOfItem;
-  Debug('TestIndexOfItem passed');
-  Debug('TestAddAndRemoveItems');
-  TestAddAndRemoveItems;
-  Debug('TestAddAndRemoveItems passed');
-
-  Debug('TestCreateFreeIndex');
-  TestCreateFreeIndex;
-  Debug('TestCreateFreeIndex passed');
-  Debug('TestAddAndRemoveIndexItems');
-  TestAddAndRemoveIndexItems;
-  Debug('TestAddAndRemoveIndexItems passed');
-
-  Debug('TestCreateFreeTable');
-  TestCreateFreeTable;
-  Debug('TestCreateFreeTable passed');
-  Debug('TestAddAndRemoveTableItems');
-  TestAddAndRemoveTableItems;
-  Debug('TestAddAndRemoveTableItems passed');
-
-  Debug('TestSwitchBetweenIndices');
-  TestSwitchBetweenIndices;
-  Debug('TestSwitchBetweenIndices passed');
-
-  Debug('TestBOFandEOF');
-  TestBOFandEOF;
-  Debug('TestBOFandEOF passed');
-
-  Debug('TestSearches');
-  TestSearches;
-  Debug('TestSearches passed');
-
-  Debug('TestStoreLoad');
-  TestStoreLoad;
-  Debug('TestStoreLoad passes');
-  Debug('TestStoreLoadIndices');
-  TestStoreLoadIndices;
-  Debug('TestStoreLoadIndices passed');
+  //Debug('TestCreateFreePrimary');
+  //TestCreateFreePrimary;
+  //Debug('TestCreateFreePrimary passed');
+  //Debug('TestIndexOfItem');
+  //TestIndexOfItem;
+  //Debug('TestIndexOfItem passed');
+  //Debug('TestAddAndRemoveItems');
+  //TestAddAndRemoveItems;
+  //Debug('TestAddAndRemoveItems passed');
+  //
+  //Debug('TestCreateFreeIndex');
+  //TestCreateFreeIndex;
+  //Debug('TestCreateFreeIndex passed');
+  //Debug('TestAddAndRemoveIndexItems');
+  //TestAddAndRemoveIndexItems;
+  //Debug('TestAddAndRemoveIndexItems passed');
+  //
+  //Debug('TestCreateFreeTable');
+  //TestCreateFreeTable;
+  //Debug('TestCreateFreeTable passed');
+  //Debug('TestAddAndRemoveTableItems');
+  //TestAddAndRemoveTableItems;
+  //Debug('TestAddAndRemoveTableItems passed');
+  //
+  //Debug('TestSwitchBetweenIndices');
+  //TestSwitchBetweenIndices;
+  //Debug('TestSwitchBetweenIndices passed');
+  //
+  //Debug('TestBOFandEOF');
+  //TestBOFandEOF;
+  //Debug('TestBOFandEOF passed');
+  //
+  //Debug('TestSearches');
+  //TestSearches;
+  //Debug('TestSearches passed');
+  //
+  //Debug('TestStoreLoad');
+  //TestStoreLoad;
+  //Debug('TestStoreLoad passes');
+  //Debug('TestStoreLoadIndices');
+  //TestStoreLoadIndices;
+  //Debug('TestStoreLoadIndices passed');
+  Debug('TestRanges');
+  TestRanges;
+  Debug('TestRanges passes');
   Debug('End of Database Test');
 end;
 

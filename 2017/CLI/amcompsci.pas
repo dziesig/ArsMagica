@@ -209,10 +209,10 @@ begin
   SetLength( Data, H, W );
 
   for I := 0 to pred( H ) do
-    for J := pred( W ) downto At do
+    for J := pred( W ) downto succ( At ) do
       Data[I,J] := Data[I,J-1];
   for I := 0 to pred( H ) do
-    Data[I,J] := Null;
+    Data[I,At] := Null;
   Result := W;
 end;
 
@@ -276,9 +276,9 @@ begin
   if At >= Result then
     raise Exception.CreateFmt( 'Adding at %d beyond Length %d of 1d Array',
                                [ At, Length ] );
-  for I := Result downto At do
+  for I := pred( Result ) downto succ( At ) do
     Data[I] := Data[I-1];
-  Data[I] := Item;
+  Data[At] := Item;   // 2017-05-22 was [I]
 end;
 
 function T1dArray.Append(Item: Elem): Integer;
@@ -296,10 +296,12 @@ end;
 function T1dArray.Del(At: Integer): Integer;
 var
   I : Integer;
+  L : Integer;
 begin
-  for I := At to pred(Length) do
-    Data[I] := Data[I+1];
-  Result := Length - 1;
+  L := Length;
+  for I := succ(At) to pred(L) do
+    Data[I-1] := Data[I];
+  Result := L - 1;
   SetLength( Data, Result );
 end;
 

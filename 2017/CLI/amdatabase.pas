@@ -182,7 +182,7 @@ var
   I, J : Integer;
   L : TObjectList;
 begin
-  Debug('TAMTable.Destroy');
+  //Debug('TAMTable.Destroy');
   Indices.Free;
   inherited Destroy;
 
@@ -322,7 +322,7 @@ var
 begin
   MakeNew;
   N := '';
-  Debug('TAMTable.Read Index Count %d.  Should be 3',[Indices.Count]);
+  //Debug('TAMTable.Read Index Count %d.  Should be 3',[Indices.Count]);
   vCount := 0; // eliminate spurious Hint
   if aVersion >= 1 then
     begin
@@ -341,6 +341,7 @@ begin
           Item := T(T.Load(TextIO) );
           Item.Id := 0;
           Add( Item );
+          //Item.Free;
         end;
     end;
 end;
@@ -437,8 +438,10 @@ var
   L, R, M : Integer;
   C : Integer;
 begin
+  Debug('BinarySearch');
   if Count <= 0 then
     begin
+      Debug('BinarySearch: Table empty');
       Result := -1;
       exit;
     end;
@@ -455,15 +458,77 @@ begin
       else
         break;
     end;
+  Debug('C:  %d,  M:  %d',[C, M] );
   if C = 0 then
-    Result := M
+    case Kind of
+      dbfExact : Result := M;
+      dbfFirst :
+        begin
+          while (M > 0) and (C = 0) do
+            begin
+              C := Item.Compare( Items[M-1], vIndex );
+              if C = 0 then Dec(M);
+            end;
+          Result := M;
+        end;
+      dbfLast :
+        begin
+          while (M < pred(Count)) and (C = 0) do
+            begin
+              C := Item.Compare( Items[M+1], vIndex );
+              if C = 0 then Inc(M);
+            end;
+          Result := M;
+        end;
+    end
   else
     case Kind of
       dbfExact : Result := -1;
-      dbfFirst : Result := L;
-      dbfLast : Result := R; // Confirm that this is correct!
+      //dbfFirst : Result := 0;
+      //dbfLast  : Result := pred(Count);
+      dbfFirst : Result := pred(Count);
+      dbfLast  : Result := 0;
     end;
+    //Result := -1;
 end;
+
+//function TAMIndex.BinarySearch(Item: TAMPersists; Kind: TDBFind): Integer;
+//var
+//  L, R, M : Integer;
+//  C : Integer;
+//begin
+//  if Count <= 0 then
+//    begin
+//      Result := -1;
+//      exit;
+//    end;
+//  L := 0;
+//  R := Count-1;
+//  while L <= R do
+//    begin
+//      M := Floor((L + R) / 2.0);
+//      C := Item.Compare( Items[M], vIndex );
+//      if C < 0 then
+//        L := M + 1
+//      else if C > 0 then
+//        R := M - 1
+//      else
+//        break;
+//    end;
+//  //if C = 0 then
+//  //  Result := M
+//  //else
+//    case Kind of
+//      //dbfExact : Result := -1;
+//      dbfExact :
+//        if C = 0 then
+//          Result := M
+//        else
+//          Result := -1;
+//      dbfFirst : Result := L;
+//      dbfLast : Result := R; // Confirm that this is correct!
+//    end;
+//end;
 
 function TAMIndex.BOF: Boolean;
 begin
@@ -537,11 +602,18 @@ end;
 
 function TAMIndex.GetItems(Idx : Integer): TAMPersists;
 begin
-  Result := TAMPersists( inherited Items[Idx] );
-  if Assigned( Result ) then
-    vCurrentItem := Idx
-  else
-    vCurrentItem := -1;
+  //Debug('TAMIndex.GetItems(%d)',[Idx]);
+  if Idx < 0 then
+    Debug('Hell');
+  try
+    Result := TAMPersists( inherited Items[Idx] );
+    if Assigned( Result ) then
+      vCurrentItem := Idx
+    else
+      vCurrentItem := -1;
+  except
+    Debug('TAMIndex.GetItems(%d) FAILED',[Idx]);
+  end;
 end;
 
 function TAMIndex.GetOwnsObjects: Boolean;
@@ -613,9 +685,13 @@ end;
 
 function TAMIndex.SetRange(Low, High: TAMPersists): Boolean;
 begin
+  //Debug('TAMIndex.SetRange');
   vLow := BinarySearch( Low, dbfFirst );
+  //Debug('TAMIndex.SetRange after dbfFirst %d .. %d done',[vLow,vHigh]);
   vHigh := BinarySearch( High, dbfLast );
-  Result := vHigh >= vLow;
+  Debug('TAMIndex.SetRange %d .. %d done',[vLow,vHigh]);
+  Result := (vHigh >= vLow) and (vHigh >= 0) and (vLow >= 0);
+  Debug('TAMIndex.SetRange %d done',[ord(Result)]);
 end;
 
 { TPrimaryIndex }
@@ -626,7 +702,7 @@ begin
   if Idx <> 0 then
     raise Exception.CreateFmt('TPrimaryIndex Idx = %d.  It MUST be 0',[Idx]);
   vIndex := 0;
-  inherited OwnsObjects := False;
+  inherited OwnsObjects := True; // was False!!!! 2017-05-22
 end;
 
 function TPrimaryIndex.Add(Item: TAMPersists): Integer;

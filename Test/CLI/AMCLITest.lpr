@@ -6,7 +6,7 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, SysUtils, AMTextIOTest, AMStringsTest, AMPersistsTest,
+  Classes, SysUtils, AMTextIOTest, AMStringsTest, AMPersistsTest, AMDebug,
   AMDatabaseTest, CustApp, AMFSMTest, AM1dArrayTest, AM2dArrayTest, AMCompSci
   { you can add units after this };
 
@@ -45,13 +45,20 @@ begin
   end;
 
   { add your program here }
-  AMStringsTest.DoTest;
-  AMTextIOTest.DoTest;
-  AMPersistsTest.DoTest;
+  try
+  //AMStringsTest.DoTest;
+  //AMTextIOTest.DoTest;
+  //AMPersistsTest.DoTest;
+  //AM1dArrayTest.DoTest;
+  //AM2dArrayTest.DoTest;
   AMDatabaseTest.DoTest;
-  //AMFSMTest.DoTest;
-  AM1dArrayTest.DoTest;
-  AM2dArrayTest.DoTest;
+  except
+    on What : Exception do
+      begin
+        Debug('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+        Debug('%S',[what.Message]);
+      end;
+  end;
   // stop program loop
   Terminate;
 end;
