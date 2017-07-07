@@ -9,7 +9,7 @@ interface
 
 uses
   AMFormPanel, AMHelpAboutUnit, AMAboutFormUnit, AMMessages, 
-  AMDataAppMainForm, LazarusPackageIntf;
+  AMDataAppMainForm, AMSignalPanel, LazarusPackageIntf;
 
 implementation
 
@@ -17,6 +17,7 @@ procedure Register;
 begin
   RegisterUnit('AMFormPanel', @AMFormPanel.Register);
   RegisterUnit('AMHelpAboutUnit', @AMHelpAboutUnit.Register);
+  RegisterUnit('AMSignalPanel', @AMSignalPanel.Register);
 end;
 
 initialization

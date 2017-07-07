@@ -9,7 +9,7 @@
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
-    <Files Count="7">
+    <Files Count="8">
       <Item1>
         <Filename Value="amformpanel.pas"/>
         <HasRegisterProc Value="True"/>
@@ -40,6 +40,11 @@
         <Filename Value="amdataappmainform.pas"/>
         <UnitName Value="AMDataAppMainForm"/>
       </Item7>
+      <Item8>
+        <Filename Value="amsignalpanel.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="AMSignalPanel"/>
+      </Item8>
     </Files>
     <RequiredPkgs Count="4">
       <Item1>

@@ -30,7 +30,7 @@
         </Debugging>
       </Linking>
     </CompilerOptions>
-    <Files Count="13">
+    <Files Count="14">
       <Item1>
         <Filename Value="amapputils.pas"/>
         <UnitName Value="AMAppUtils"/>
@@ -83,6 +83,10 @@
         <Filename Value="amstatemachine.pas"/>
         <UnitName Value="AMStateMachine"/>
       </Item13>
+      <Item14>
+        <Filename Value="amplayaudiofile.pas"/>
+        <UnitName Value="amplayaudiofile"/>
+      </Item14>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>

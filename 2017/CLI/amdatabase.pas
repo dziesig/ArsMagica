@@ -438,7 +438,7 @@ var
   L, R, M : Integer;
   C : Integer;
 begin
-  Debug('BinarySearch');
+  Debug('BinarySearch:  %d',[Count]);
   if Count <= 0 then
     begin
       Debug('BinarySearch: Table empty');
@@ -685,7 +685,7 @@ end;
 
 function TAMIndex.SetRange(Low, High: TAMPersists): Boolean;
 begin
-  //Debug('TAMIndex.SetRange');
+  Debug('TAMIndex.SetRange');
   vLow := BinarySearch( Low, dbfFirst );
   //Debug('TAMIndex.SetRange after dbfFirst %d .. %d done',[vLow,vHigh]);
   vHigh := BinarySearch( High, dbfLast );

@@ -10,7 +10,7 @@ interface
 uses
   AMAppUtils, AMCompSci, AMDatabase, AMDatabaseTest, AMDebug, AMDotIni, 
   AMFileUtils, AMObjectFactory, AMPersists, AMStrings, AMTextIO, AMDataUnit, 
-  AMStateMachine, LazarusPackageIntf;
+  AMStateMachine, AMPlayAudioFile, LazarusPackageIntf;
 
 implementation
 

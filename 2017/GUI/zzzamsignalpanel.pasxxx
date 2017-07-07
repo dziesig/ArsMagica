@@ -1,0 +1,31 @@
+unit AMSignalPanel;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls;
+
+type
+  TAMSignalPanel = class(TPanel)
+  private
+
+  protected
+
+  public
+
+  published
+
+  end;
+
+procedure Register;
+
+implementation
+
+procedure Register;
+begin
+  RegisterComponents('Ars Magica',[TAMSignalPanel]);
+end;
+
+end.
