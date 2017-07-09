@@ -89,9 +89,9 @@ function TAMData.Open(FilePath: String): TAMData;
 var
   TextIO : TTextIO;
 begin
-  TextIO := TTextIO.Create( FilePath, False );
-{  Result := TAMData(Load( TextIO ));  }
-  TextIO.Free;
+//  TextIO := TTextIO.Create( FilePath, False );
+//{  Result := TAMData(Load( TextIO ));  }
+//  TextIO.Free;
   DoSetModified( False );
 end;
 
