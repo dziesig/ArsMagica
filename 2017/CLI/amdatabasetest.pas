@@ -721,7 +721,7 @@ begin
     if I <> 3 then
       raise Exception.CreateFmt('Range[''D'',''G'') size is %d, 3 expected',[I]);
 
-    if ATable.SetRange(SearchItem1,SearchItem0) then
+    if ATable.SetRange(SearchItem1,SearchItem0) > 0 then
       raise Exception.Create('Range [''G'',''D'') is NOT empty');
 
     ATable.SetRange( SearchItem0,SearchItem1 );

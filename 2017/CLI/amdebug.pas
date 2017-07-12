@@ -78,14 +78,14 @@ begin
   FLS := FileLineString( get_frame );
   RightLen := Length( Msg );
   LeftLen  := Length( FLS );
-  if (LeftLen + RightLen) > 75 then
+  if (LeftLen + RightLen) > 80 then
     begin
       DebugLn(FLS);
       DebugLn('  ' + Msg)
     end
   else
     begin
-      Msg := Format('%-30s %s',[FLS,Msg]);
+      Msg := Format('%-22s %s',[FLS,Msg]);
       DebugLn( Msg );
     end;
 end;

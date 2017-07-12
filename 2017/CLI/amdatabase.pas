@@ -59,7 +59,7 @@ type
     function Find( Item : TAMPersists; Kind : TDBFind = dbfExact ) : TAMPersists;
 
     // Range is [Low, High)
-    function SetRange( Low, High : TAMPersists ) : Boolean; // false if range empty
+    function SetRange( Low, High : TAMPersists ) : Integer; // Count in range //Boolean; // false if range empty
     procedure ClearRange;
 
     function Remove( Index : Integer ) : Integer;  overload; // Frees the Item
@@ -141,7 +141,7 @@ type
 
       function Find( Item : T ) : T;
 
-      function SetRange( Low, High : T ) : Boolean; // true if range not empty
+      function SetRange( Low, High : T ) : Integer; // Boolean; // true if range not empty
       procedure ClearRange;
 
       procedure Read( TextIO : TTextIO; aVersion : Integer ); override;
@@ -380,7 +380,7 @@ begin
 
 end;
 
-function TAMTable.SetRange(Low, High: T): Boolean;
+function TAMTable.SetRange(Low, High: T): Integer;
 begin
   if fIndexIdx = 0 then
     raise Exception.Create('Index required to perform "SetRange"');
@@ -438,7 +438,7 @@ var
   L, R, M : Integer;
   C : Integer;
 begin
-  Debug('BinarySearch:  %d',[Count]);
+  //Debug('BinarySearch:  %d',[Count]);
   if Count <= 0 then
     begin
       Debug('BinarySearch: Table empty');
@@ -458,7 +458,7 @@ begin
       else
         break;
     end;
-  Debug('C:  %d,  M:  %d',[C, M] );
+  //Debug('C:  %d,  M:  %d',[C, M] );
   if C = 0 then
     case Kind of
       dbfExact : Result := M;
@@ -546,6 +546,7 @@ var
   C : Integer;
 begin
   C := Count;
+  //Debug( 'Current:  %d, Count : %d',[vCurrentItem, C] );
   if (vCurrentItem >= 0) and (vCurrentItem < C) then
     Result := TAMPersists(Items[vCurrentItem])
   else
@@ -590,6 +591,7 @@ function TAMIndex.First: TAMPersists;
 begin
   if vHigh >= vLow then
     begin
+      //Debug( 'First:  %d',[vLow]);
       Result := Items[vLow];
       vCurrentItem := vLow;
     end
@@ -683,15 +685,20 @@ begin
   inherited OwnsObjects := AValue;
 end;
 
-function TAMIndex.SetRange(Low, High: TAMPersists): Boolean;
+function TAMIndex.SetRange(Low, High: TAMPersists): Integer;
+var
+  NotEmpty : Boolean;
 begin
-  Debug('TAMIndex.SetRange');
+  //Debug('TAMIndex.SetRange');
   vLow := BinarySearch( Low, dbfFirst );
-  //Debug('TAMIndex.SetRange after dbfFirst %d .. %d done',[vLow,vHigh]);
   vHigh := BinarySearch( High, dbfLast );
-  Debug('TAMIndex.SetRange %d .. %d done',[vLow,vHigh]);
-  Result := (vHigh >= vLow) and (vHigh >= 0) and (vLow >= 0);
-  Debug('TAMIndex.SetRange %d done',[ord(Result)]);
+  //Debug('TAMIndex.SetRange %d .. %d done',[vLow,vHigh]);
+  NotEmpty := (vHigh >= vLow) and (vHigh >= 0) and (vLow >= 0);
+  if NotEmpty then
+    Result := vHigh - vLow + 1
+  else
+    Result := 0;
+  //Debug('TAMIndex.SetRange %d done',[ord(Result)]);
 end;
 
 { TPrimaryIndex }
