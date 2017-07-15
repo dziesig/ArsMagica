@@ -49,7 +49,7 @@ begin
   FLS := FileLineString( get_frame );
   RightLen := Length(Message);
   LeftLen  := Length( FLS );
-  if (LeftLen + RightLen) > 75 then
+  if (LeftLen + RightLen) > 120 then
     begin
       DebugLn(FLS);
       DebugLn('  ' + Message)
@@ -78,7 +78,7 @@ begin
   FLS := FileLineString( get_frame );
   RightLen := Length( Msg );
   LeftLen  := Length( FLS );
-  if (LeftLen + RightLen) > 80 then
+  if (LeftLen + RightLen) > 120 then
     begin
       DebugLn(FLS);
       DebugLn('  ' + Msg)
