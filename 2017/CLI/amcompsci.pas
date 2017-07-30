@@ -24,13 +24,24 @@ unit AMCompSci;
 interface
 
 uses
-  Classes, SysUtils, Types;
+  Classes, SysUtils, Types, Contnrs;
 
 {==============================================================================}
 { Dynamic Arrays (extended)                                                    }
 {==============================================================================}
 
 type
+
+  { TAMList }
+
+  generic TAMList< Elem > = class(TObjectList)
+    public
+      constructor Create;
+      destructor  Destroy; override;
+
+      function Add( Item : Elem ) : Integer;
+      function Remove( Item : Elem ) : Integer;
+  end;
 
   { T1dArray }
 
@@ -135,6 +146,45 @@ begin
     else
       ObjCR := ObjCR.ClassParent;
 end;
+
+{ TAMList }
+
+constructor TAMList.Create;
+begin
+  inherited Create(False);
+end;
+
+function TAMList.Add(Item : Elem) : Integer;
+var
+  Idx : Integer;
+begin
+  Idx := IndexOf( TObject( Item ) );
+  if Idx < 0 then
+    begin
+      Idx := IndexOf( nil    );
+      if Idx >= 0 then
+        begin
+          Items[Idx] := TObject( Item );
+          Result := Idx;
+          exit;
+        end;
+    end;
+
+  Result := inherited Add( TObject( Item ));
+end;
+
+destructor TAMList.Destroy;
+begin
+  inherited Destroy;
+end;
+
+function TAMList.Remove(Item : Elem) : Integer;
+begin
+  REsult := IndexOf( TObject( Item ) );
+  if Result >= 0 then
+    Items[Result] := nil;
+end;
+
 
 { T2dArray }
 

@@ -1,4 +1,4 @@
-unit AMDataAppMainForm;
+unit AMGraphicsAppMainFormUnit;
 
 {$mode objfpc}{$H+}
 
@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  Menus, ActnList, StdCtrls, ExtCtrls, AMFormPanel, AMHelpAboutUnit, AMDataUnit;
+  Menus, ActnList, StdCtrls, ExtCtrls, AMHelpAboutUnit, AMDataUnit;
 
 type
 
@@ -14,7 +14,6 @@ type
 
   TMainForm = class(TForm)
     ActionList1: TActionList;
-    AMFormPanel1: TAMFormPanel;
     AMHelpAbout1: TAMHelpAbout;
     FileExitAction: TAction;
     FileNewAction: TAction;
@@ -120,14 +119,14 @@ end;
 
 procedure TMainForm.ControlsToData;
 begin
-  if Assigned( AMFormPanel1.Form ) and Assigned( AMFormPanel1.Form.OnHide ) then
-    AMFormPanel1.Form.OnHide(nil);
+  //if Assigned( AMFormPanel1.Form ) and Assigned( AMFormPanel1.Form.OnHide ) then
+  //  AMFormPanel1.Form.OnHide(nil);
 end;
 
 procedure TMainForm.DataToControls;
 begin
-  if Assigned( AMFormPanel1.Form ) then
-    AMFormPanel1.Form.OnShow(nil);
+  //if Assigned( AMFormPanel1.Form ) then
+  //  AMFormPanel1.Form.OnShow(nil);
 end;
 
 procedure TMainForm.DoPrint;
@@ -255,8 +254,8 @@ begin
   if FileOk then
     begin
       ControlsToData;
-      if Assigned( AMFormPanel1.Form.OnHide ) then
-        AMFormPanel1.Form.OnHide(nil);
+      //if Assigned( AMFormPanel1.Form.OnHide ) then
+      //  AMFormPanel1.Form.OnHide(nil);
       Data.Save( FilePath )
     end
   else
@@ -272,9 +271,9 @@ begin
         begin
           FilePath := SaveDialog1.FileName;
           ControlsToData;
-          if Assigned( AMFormPanel1.Form ) and
-             Assigned( AMFormPanel1.Form.OnHide )  then
-            AMFormPanel1.Form.OnHide(nil);
+          //if Assigned( AMFormPanel1.Form ) and
+          //   Assigned( AMFormPanel1.Form.OnHide )  then
+          //  AMFormPanel1.Form.OnHide(nil);
           Data.Save( FilePath );
         end;
     end;
@@ -282,7 +281,7 @@ end;
 
 procedure TMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  AMFormPanel1.Form := nil;
+  //AMFormPanel1.Form := nil;
 end;
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);

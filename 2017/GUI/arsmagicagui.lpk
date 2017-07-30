@@ -37,8 +37,8 @@
         <Type Value="LFM"/>
       </Item6>
       <Item7>
-        <Filename Value="amdataappmainform.pas"/>
-        <UnitName Value="AMDataAppMainForm"/>
+        <Filename Value="amgraphicsappmainformunit.pas"/>
+        <UnitName Value="AMGraphicsAppMainFormUnit"/>
       </Item7>
       <Item8>
         <Filename Value="amsignalpanel.pas"/>

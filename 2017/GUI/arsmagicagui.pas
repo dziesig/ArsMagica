@@ -9,7 +9,7 @@ interface
 
 uses
   AMFormPanel, AMHelpAboutUnit, AMAboutFormUnit, AMMessages, 
-  AMDataAppMainForm, AMSignalPanel, LazarusPackageIntf;
+  AMGraphicsAppMainFormUnit, AMSignalPanel, LazarusPackageIntf;
 
 implementation
 

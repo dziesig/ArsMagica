@@ -8,7 +8,6 @@ uses
   Classes, SysUtils, AMPersists, AMTextIO;
 
 type
-  //TModifiedChangedEvent = procedure( Sender : TObject; var Changed : Boolean ) of object;
 
   { TAMData }
 
@@ -20,23 +19,23 @@ type
     fOnModifyEvent: TNotifyEvent;
     fOnUnModifyEvent : TNotifyEvent;
   public
-      constructor Create( aParent : TAMPersists = nil); virtual; { override;  }
-      destructor  Destroy; override;
+    constructor Create( aParent : TAMPersists = nil); virtual; { override;  }
+    destructor  Destroy; override;
 
-      procedure  New; virtual;
-      function   Open( FilePath : String ) : TAMData; virtual;
-      function   Save( FilePath : String ) : Boolean; virtual;
+    procedure  New; virtual;
+    function   Open( FilePath : String ) : TAMData; virtual;
+    function   Save( FilePath : String ) : Boolean; virtual;
 
-      procedure  Read( TextIO : TTextIO; aVersion : Integer ); virtual;
-      procedure  Write( TextIO : TTextIO );  virtual;
+    procedure  Read( TextIO : TTextIO; aVersion : Integer ); virtual;
+    procedure  Write( TextIO : TTextIO );  virtual;
 
-      procedure  DoSetModified( Value : Boolean );
+    procedure  DoSetModified( Value : Boolean );
 
-      property   Modified : Boolean read GetModified;
+    property   Modified : Boolean read GetModified;
 
 // Events sent to the main program
-      property   OnModifyEvent : TNotifyEvent read fOnModifyEvent write fOnModifyEvent;
-      property   OnUnModifyEvent : TNotifyEvent read fOnUnModifyEvent write fOnUnModifyEvent;
+    property   OnModifyEvent : TNotifyEvent read fOnModifyEvent write fOnModifyEvent;
+    property   OnUnModifyEvent : TNotifyEvent read fOnUnModifyEvent write fOnUnModifyEvent;
   end;
 
 implementation

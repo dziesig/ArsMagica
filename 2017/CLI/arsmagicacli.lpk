@@ -30,7 +30,7 @@
         </Debugging>
       </Linking>
     </CompilerOptions>
-    <Files Count="14">
+    <Files Count="16">
       <Item1>
         <Filename Value="amapputils.pas"/>
         <UnitName Value="AMAppUtils"/>
@@ -48,45 +48,53 @@
         <UnitName Value="AMDatabaseTest"/>
       </Item4>
       <Item5>
-        <Filename Value="amdebug.pas"/>
-        <UnitName Value="AMDebug"/>
-      </Item5>
-      <Item6>
-        <Filename Value="amdotini.pas"/>
-        <UnitName Value="AMDotIni"/>
-      </Item6>
-      <Item7>
-        <Filename Value="amfileutils.pas"/>
-        <UnitName Value="AMFileUtils"/>
-      </Item7>
-      <Item8>
-        <Filename Value="amobjectfactory.pas"/>
-        <UnitName Value="AMObjectFactory"/>
-      </Item8>
-      <Item9>
-        <Filename Value="ampersists.pas"/>
-        <UnitName Value="AMPersists"/>
-      </Item9>
-      <Item10>
-        <Filename Value="amstrings.pas"/>
-        <UnitName Value="AMStrings"/>
-      </Item10>
-      <Item11>
-        <Filename Value="amtextio.pas"/>
-        <UnitName Value="AMTextIO"/>
-      </Item11>
-      <Item12>
         <Filename Value="amdataunit.pas"/>
         <UnitName Value="AMDataUnit"/>
+      </Item5>
+      <Item6>
+        <Filename Value="amdebug.pas"/>
+        <UnitName Value="AMDebug"/>
+      </Item6>
+      <Item7>
+        <Filename Value="amdotini.pas"/>
+        <UnitName Value="AMDotIni"/>
+      </Item7>
+      <Item8>
+        <Filename Value="amfileutils.pas"/>
+        <UnitName Value="AMFileUtils"/>
+      </Item8>
+      <Item9>
+        <Filename Value="amimageprocessing.pas"/>
+        <UnitName Value="AMImageProcessing"/>
+      </Item9>
+      <Item10>
+        <Filename Value="amimages.pas"/>
+        <UnitName Value="AMImages"/>
+      </Item10>
+      <Item11>
+        <Filename Value="amobjectfactory.pas"/>
+        <UnitName Value="AMObjectFactory"/>
+      </Item11>
+      <Item12>
+        <Filename Value="ampersists.pas"/>
+        <UnitName Value="AMPersists"/>
       </Item12>
       <Item13>
-        <Filename Value="amstatemachine.pas"/>
-        <UnitName Value="AMStateMachine"/>
+        <Filename Value="amplayaudiofile.pas"/>
+        <UnitName Value="AMPlayAudioFile"/>
       </Item13>
       <Item14>
-        <Filename Value="amplayaudiofile.pas"/>
-        <UnitName Value="amplayaudiofile"/>
+        <Filename Value="amstatemachine.pas"/>
+        <UnitName Value="AMStateMachine"/>
       </Item14>
+      <Item15>
+        <Filename Value="amstrings.pas"/>
+        <UnitName Value="AMStrings"/>
+      </Item15>
+      <Item16>
+        <Filename Value="amtextio.pas"/>
+        <UnitName Value="AMTextIO"/>
+      </Item16>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>

@@ -47,11 +47,15 @@ type
       function    Readln( var Bool : Boolean ) : Integer; overload;
       function    ReadLn( var Card : Cardinal ) : Integer;   overload;
 
+      function    ReadMulti( var Data; Count, Size : Integer ) : Integer;
+
       procedure   Writeln( Line : String; MultiLine : Boolean = False );    overload;
       procedure   Writeln( Int  : Integer );   overload;
       procedure   Writeln( Dbl  : Double );     overload;
       procedure   Writeln( Bool : Boolean );    overload;
       procedure   WriteLn( Card : Cardinal );   overload;
+
+      procedure   WriteMulti( var Data; Count, Size : Integer );
 
       property    LineNo : Integer read fLineNo;
       property    Path : String read fPath;
@@ -162,6 +166,26 @@ begin
     end;
 end;
 
+function TTextIO.ReadMulti(var Data; Count, Size : Integer) : Integer;
+var
+  Siz : Integer;
+  Cnt : Integer;
+  Txt : String;
+begin
+  System.ReadLn( fFile, Cnt );
+  if Cnt <> Count then
+    raise Exception.CreateFmt( 'ReadMulti Count is %d, desired %d',
+                               [Cnt, Count] );
+  System.ReadLn( fFile, Siz );
+  if Siz <> Size then
+    raise Exception.CreateFmt( 'ReadMulti Size is %d, desired %d',
+                               [Siz, Size] );
+  Siz := Count*Size;
+  SetLength( Txt, Siz*2);
+  System.ReadLn( fFile, Txt );
+  HexToBin( PChar( Txt ), @Data, Siz );
+end;
+
 procedure TTextIO.Writeln(Bool: Boolean);
 var
   Txt : String;
@@ -236,6 +260,28 @@ begin
                                    [ExtractFileName( fPath ),fLineNo]);
       System.Writeln( fFile, Line );
     end;
+end;
+
+procedure TTextIO.WriteMulti(var Data; Count, Size : Integer);
+type
+  TBuf = array of Byte;
+var
+  Txt : String;
+  Buf : TBuf;
+  Siz : Integer;
+begin
+  Inc(fLineNo);
+  Buf := TBuf(Data);
+  if not fOut then
+    raise Exception.CreateFmt( 'Attempt to write to input file %s at line %d',
+                               [ExtractFileName( fPath ),fLineNo]);
+  System.WriteLn( fFile, Count );
+  System.WriteLn( fFile, Size );
+  Siz := Count*Size;
+  SetLength( Txt, Siz*2 );
+  BinToHex( @Data, PChar(Txt), Siz);
+  System.WriteLn( fFile, Txt );
+  SetLength( Txt, 0 );
 end;
 
 end.

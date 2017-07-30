@@ -8,9 +8,10 @@ unit ArsMagicaCLI;
 interface
 
 uses
-  AMAppUtils, AMCompSci, AMDatabase, AMDatabaseTest, AMDebug, AMDotIni, 
-  AMFileUtils, AMObjectFactory, AMPersists, AMStrings, AMTextIO, AMDataUnit, 
-  AMStateMachine, AMPlayAudioFile, LazarusPackageIntf;
+  AMAppUtils, AMCompSci, AMDatabase, AMDatabaseTest, AMDataUnit, AMDebug, 
+  AMDotIni, AMFileUtils, AMImageProcessing, AMImages, AMObjectFactory, 
+  AMPersists, AMPlayAudioFile, AMStateMachine, AMStrings, AMTextIO, 
+  LazarusPackageIntf;
 
 implementation
 
