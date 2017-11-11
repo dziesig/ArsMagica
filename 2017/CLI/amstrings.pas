@@ -2,6 +2,10 @@
 
   Copyright (C) 1995 .. 2017 Donald R. Ziesig donald@ziesig.org
 
+  This code is derived from the various "MagicLibraryYYYY"s by the same author.
+  It has been Refactored to separate non-gui and gui modules.  This implements
+  most of what used to be called "StringSubs".
+
   This source is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free
   Software Foundation; either version 2 of the License, or (at your option)
@@ -85,6 +89,8 @@ function BoolToStr( Value : Boolean ) : String;
 function IntToStr( Value : Integer; Width : Integer; ZeroPad : Boolean = False ) : String; overload;
 
 function USPhone( Value : String ) : String;
+
+function Compare( S1, S2 : String ) : Integer;
 
 implementation
 
@@ -305,6 +311,16 @@ begin
       else if (I = 10) and (L > 10) then
         Result := Result + ' x ';
     end;
+end;
+
+function Compare(S1, S2 : String) : Integer;
+begin
+  if S1 < s2 then
+    Result := 1
+  else if S1 > S2 then
+    Result := -1
+  else
+    Result := 0;
 end;
 
 end.

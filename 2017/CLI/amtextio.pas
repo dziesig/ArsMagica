@@ -46,14 +46,18 @@ type
       function    Readln( var Dbl  : Double ) : Integer;  overload;
       function    Readln( var Bool : Boolean ) : Integer; overload;
       function    ReadLn( var Card : Cardinal ) : Integer;   overload;
+      function    ReadLn( var Wrd  : Word ) : Integer; overload;
 
       function    ReadMulti( var Data; Count, Size : Integer ) : Integer;
+
+      procedure   Rewind; // All the way back to the beginning of file.
 
       procedure   Writeln( Line : String; MultiLine : Boolean = False );    overload;
       procedure   Writeln( Int  : Integer );   overload;
       procedure   Writeln( Dbl  : Double );     overload;
       procedure   Writeln( Bool : Boolean );    overload;
       procedure   WriteLn( Card : Cardinal );   overload;
+      procedure   WriteLn( Wrd  : Word ); overload;
 
       procedure   WriteMulti( var Data; Count, Size : Integer );
 
@@ -71,7 +75,7 @@ begin
   inherited Create;
   fLineNo := 0;
   fPath := aPath;
-  AssignFile( fFile, aPath );
+  AssignFile( fFile, fPath );
   fOut := Output;
   if Output then
     Rewrite( fFile )
@@ -146,6 +150,7 @@ var
   I     : Integer;
 begin
   Lines := 0;
+  Str := '';
   if MultiLine then
     begin
       ReadLn( Lines );
@@ -166,12 +171,33 @@ begin
     end;
 end;
 
+function TTextIO.ReadLn(var Wrd : Word) : Integer;
+var
+  S : String;
+begin
+  Inc(fLineNo);
+  Result := fLineNo;
+  if fOut then
+    raise Exception.CreateFmt( 'Attempt to read from output file %s at line %d',
+                               [ExtractFileName( fPath ),fLineNo]);
+  try
+    System.ReadLn( fFile, S );
+    Wrd := StrToInt( S );
+  except
+    raise EFormatError.CreateFmt('Invalid numeric (Integer) format "%s" at line %d.',[s,fLineNo]);
+  end;
+end;
+
 function TTextIO.ReadMulti(var Data; Count, Size : Integer) : Integer;
+type
+  TBuf = array of Byte;
 var
   Siz : Integer;
   Cnt : Integer;
   Txt : String;
+  Buf : TBuf;
 begin
+  Result := 0; // Don't remember what this is for 2017/10/24
   System.ReadLn( fFile, Cnt );
   if Cnt <> Count then
     raise Exception.CreateFmt( 'ReadMulti Count is %d, desired %d',
@@ -180,10 +206,19 @@ begin
   if Siz <> Size then
     raise Exception.CreateFmt( 'ReadMulti Size is %d, desired %d',
                                [Siz, Size] );
+  Buf := TBuf(Data);
   Siz := Count*Size;
   SetLength( Txt, Siz*2);
   System.ReadLn( fFile, Txt );
-  HexToBin( PChar( Txt ), @Data, Siz );
+  HexToBin( PChar( Txt ), Pchar( Buf ), Siz );
+end;
+
+procedure TTextIO.Rewind;
+begin
+  CloseFile( fFile );
+  AssignFile( fFile, fPath );
+  Reset( fFile );
+  fLineNo := 0;
 end;
 
 procedure TTextIO.Writeln(Bool: Boolean);
@@ -262,6 +297,15 @@ begin
     end;
 end;
 
+procedure TTextIO.WriteLn(Wrd : Word);
+begin
+  Inc( fLineNo );
+  if not fOut then
+    raise Exception.CreateFmt( 'Attempt to write to input file %s at line %d',
+                               [ExtractFileName( fPath ),fLineNo]);
+  System.Writeln( fFile, Wrd );
+end;
+
 procedure TTextIO.WriteMulti(var Data; Count, Size : Integer);
 type
   TBuf = array of Byte;
@@ -279,7 +323,7 @@ begin
   System.WriteLn( fFile, Size );
   Siz := Count*Size;
   SetLength( Txt, Siz*2 );
-  BinToHex( @Data, PChar(Txt), Siz);
+  BinToHex( PChar(Buf), PChar(Txt), Siz);
   System.WriteLn( fFile, Txt );
   SetLength( Txt, 0 );
 end;

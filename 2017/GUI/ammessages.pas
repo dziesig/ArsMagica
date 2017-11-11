@@ -10,6 +10,7 @@ uses
 function SaveModified( Doing, What : String ) : Integer;  overload;
 function SaveModified( What : String ) : Integer; overload;
 function ReallyDelete( Kind, What : String ) : Boolean;
+procedure Stub( ForWhat : String );
 
 
 implementation
@@ -38,6 +39,12 @@ begin
   Ans := MessageDlg( Format('Do you really want to delete %s %s?',[Kind,What]),
                      mtConfirmation, [mbYes, mbNo], 0);
   Result := Ans = mrYes;
+end;
+
+procedure Stub(ForWhat : String);
+begin
+  MessageDlg( Format( '%s is not yet implemented',[ForWhat] ),
+                      mtInformation,[mbOk],0 );
 end;
 
 end.

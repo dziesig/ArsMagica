@@ -6,24 +6,29 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  Buttons;
+  Buttons, ExtCtrls;
 
 type
 
   { TAMAboutForm }
 
   TAMAboutForm = class(TForm)
-    BitBtn1: TBitBtn;
-    ConfigFolderLabel: TLabel;
-    CopyrightByLabel: TLabel;
-    CopyrightYearsLabel: TLabel;
-    DefaultDataFolderLabel: TLabel;
-    Label1: TLabel;
-    Label2: TLabel;
-    Label3: TLabel;
-    Label4: TLabel;
-    Label5: TLabel;
-    LastBuildLabel: TLabel;
+    BitBtn1 : TBitBtn;
+    ConfigFolderLabel : TLabel;
+    CopyrightByLabel : TLabel;
+    CopyrightYearsLabel : TLabel;
+    DefaultDataFolderLabel : TLabel;
+    Label1 : TLabel;
+    Label2 : TLabel;
+    Label3 : TLabel;
+    Label4 : TLabel;
+    Label5 : TLabel;
+    LastBuildLabel : TLabel;
+    Panel1 : TPanel;
+    Panel2 : TPanel;
+    Panel3 : TPanel;
+    Panel4 : TPanel;
+    Panel5 : TPanel;
     procedure FormCreate(Sender: TObject);
   private
     fAppName: String;

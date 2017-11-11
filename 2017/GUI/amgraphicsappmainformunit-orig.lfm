@@ -1,10 +1,10 @@
 object MainForm: TMainForm
-  Left = 710
+  Left = 532
   Height = 742
-  Top = 251
+  Top = 234
   Width = 1118
   Caption = 'MainForm'
-  ClientHeight = 702
+  ClientHeight = 742
   ClientWidth = 1118
   DesignTimePPI = 144
   Menu = MainMenu1
@@ -14,7 +14,7 @@ object MainForm: TMainForm
   OnDestroy = FormDestroy
   OnShow = FormShow
   Position = poScreenCenter
-  LCLVersion = '1.8.0.4'
+  LCLVersion = '1.9.0.0'
   object ToolBar1: TToolBar
     Left = 0
     Height = 36
@@ -47,7 +47,7 @@ object MainForm: TMainForm
     end
     object ToolButton5: TToolButton
       Left = 141
-      Height = 33
+      Height = 8
       Top = 2
       Caption = 'ToolButton5'
       Style = tbsSeparator

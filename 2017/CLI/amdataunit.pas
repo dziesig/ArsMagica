@@ -1,3 +1,25 @@
+{ AMData.  A generic interface for persistent data.
+
+  Copyright (C) 1995..2017 by Donald R. Ziesig donald@ziesig.org
+
+  This code is derived from the various "MagicLibraryYYYY"s by the same author.
+  It has been Refactored to separate non-gui and gui modules.
+
+  This source is free software; you can redistribute it and/or modify it under
+  the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
+  any later version.
+
+  This code is distributed in the hope that it will be useful, but WITHOUT ANY
+  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+  FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+  details.
+
+  A copy of the GNU General Public License is available on the World Wide Web
+  at <http://www.gnu.org/copyleft/gpl.html>. You can also obtain it by writing
+  to the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
+  Boston, MA 02110-1335, USA.
+}
 unit AMDataUnit;
 
 {$mode objfpc}{$H+}
@@ -11,11 +33,11 @@ type
 
   { TAMData }
 
-  TAMData = class{( TAMPersists )}
+  TAMData = class( TAMPersists )
   private
     function GetModified: Boolean;
   protected
-    fModified : Boolean;
+    //fModified : Boolean;
     fOnModifyEvent: TNotifyEvent;
     fOnUnModifyEvent : TNotifyEvent;
   public
@@ -26,8 +48,11 @@ type
     function   Open( FilePath : String ) : TAMData; virtual;
     function   Save( FilePath : String ) : Boolean; virtual;
 
-    procedure  Read( TextIO : TTextIO; aVersion : Integer ); virtual;
-    procedure  Write( TextIO : TTextIO );  virtual;
+    procedure Assign( Source : TAMPersists ); override;
+    procedure AssignTo( Dest : TAMPersists ); override;
+
+    //procedure  Read( TextIO : TTextIO; aVersion : Integer ); override;
+    //procedure  Write( TextIO : TTextIO );  override;
 
     procedure  DoSetModified( Value : Boolean );
 
@@ -47,7 +72,19 @@ uses
 
 constructor TAMData.Create(aParent: TAMPersists);
 begin
+  fOnModifyEvent := nil;
+  fOnUnModifyEvent := nil;
   {inherited Create(aParent); }
+end;
+
+procedure TAMData.Assign(Source : TAMPersists);
+begin
+  inherited Assign(Source);
+end;
+
+procedure TAMData.AssignTo(Dest : TAMPersists);
+begin
+  inherited AssignTo(Dest);
 end;
 
 destructor TAMData.Destroy;
@@ -63,12 +100,12 @@ begin
   //Debug('DoSetModified  %p',[Pointer(@fOnModifyEvent)]);
   if Value then
     begin
-      if Assigned( @fOnModifyEvent ) then
+      if Assigned( fOnModifyEvent ) then
         fOnModifyEvent( Self );
     end
   else
     begin
-      if Assigned( @fOnUnModifyEvent ) then
+      if Assigned( fOnUnModifyEvent ) then
         fOnUnModifyEvent( Self );
     end;
 end;
@@ -89,31 +126,32 @@ var
   TextIO : TTextIO;
 begin
 //  TextIO := TTextIO.Create( FilePath, False );
-//{  Result := TAMData(Load( TextIO ));  }
+////{  Result := TAMData(Load( TextIO ));  }
 //  TextIO.Free;
-  DoSetModified( False );
+//  DoSetModified( False );
 end;
 
-procedure TAMData.Read(TextIO: TTextIO; aVersion: Integer);
-begin
-{  inherited;  }
-end;
+//procedure TAMData.Read(TextIO: TTextIO; aVersion: Integer);
+//begin
+//{  inherited;  }
+//end;
 
 function TAMData.Save(FilePath: String): Boolean;
 var
   TextIO : TTextIO;
 begin
   TextIO := TTextIO.Create( FilePath, True );
-  Result := Assigned( TextIO );
-  TextIO.WriteLn('ZZZ');
+  Store( TextIO );
+  //Result := Assigned( TextIO );
+  //TextIO.WriteLn('ZZZ');
   TextIO.Free;
   DoSetModified( False );
 end;
 
-procedure TAMData.Write(TextIO: TTextIO);
-begin
-  inherited;
-end;
+//procedure TAMData.Write(TextIO: TTextIO);
+//begin
+//  //inherited;
+//end;
 
 end.
 

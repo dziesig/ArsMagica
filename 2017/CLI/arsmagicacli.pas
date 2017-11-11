@@ -9,9 +9,8 @@ interface
 
 uses
   AMAppUtils, AMCompSci, AMDatabase, AMDatabaseTest, AMDataUnit, AMDebug, 
-  AMDotIni, AMFileUtils, AMImageProcessing, AMImages, AMObjectFactory, 
-  AMPersists, AMPlayAudioFile, AMStateMachine, AMStrings, AMTextIO, 
-  LazarusPackageIntf;
+  AMDotIni, AMFileUtils, AMObjectFactory, AMPersists, AMPlayAudioFile, 
+  AMStateMachine, AMStrings, AMTextIO, LazarusPackageIntf;
 
 implementation
 

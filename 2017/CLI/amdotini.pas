@@ -55,7 +55,8 @@ uses
 implementation
 
 uses
-  IniFiles;
+  IniFiles,
+  AMDebug;
 
 function OpenIniFile : TIniFile; // Local to this unit
 var

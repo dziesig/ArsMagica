@@ -1,3 +1,25 @@
+{ AMPersists.  An interface for persistent data.
+
+  Copyright (C) 1995..2017 by Donald R. Ziesig donald@ziesig.org
+
+  This code is derived from the various "MagicLibraryYYYY"s by the same author.
+  It has been Refactored to separate non-gui and gui modules.
+
+  This source is free software; you can redistribute it and/or modify it under
+  the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
+  any later version.
+
+  This code is distributed in the hope that it will be useful, but WITHOUT ANY
+  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+  FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+  details.
+
+  A copy of the GNU General Public License is available on the World Wide Web
+  at <http://www.gnu.org/copyleft/gpl.html>. You can also obtain it by writing
+  to the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
+  Boston, MA 02110-1335, USA.
+}
 unit AMPersists;
 
 {$mode objfpc}{$H+}
@@ -46,6 +68,7 @@ type
   public
     DebugString : String;
     constructor Create( aParent : TAMPersists = nil); virtual;
+    constructor Create( TextIO : TTextIO; aParebt : TAMPersists = nil ); virtual;
     destructor  Destroy; override;
     procedure   MakeNew; virtual; // Initialize new instances.  Particularly useful
                                   // for handling reading older versions of the object
@@ -60,7 +83,7 @@ type
     function Compare( ToItem : TAMPersists; Index : Integer ) : Integer; virtual;
 
     procedure Read( TextIO : TTextIO; aVersion : Integer ); virtual;
-    procedure Write( TextIO : TTextIO ); virtual;
+    procedure Write( TextIO : TTextIO ); virtual; abstract;
 
     function  ToString : String; override;
 
@@ -92,6 +115,8 @@ type
     property OnModify   : TNotifyEvent read fOnModify write SetOnModify; // Needed to
                                                                        // monitor mods.
   end;
+
+  PAMPersists = ^TAMPersists;
 
   EModifingID       = Exception;
   ENonExistentIndex = Exception;
@@ -132,6 +157,11 @@ begin
   if Assigned(fOnModify) then
     raise Exception.Create('fOnModify not nil after Create');
   MakeNew;
+end;
+
+constructor TAMPersists.Create(TextIO : TTextIO; aParebt : TAMPersists);
+begin
+  ;
 end;
 
 destructor TAMPersists.Destroy;
@@ -352,10 +382,10 @@ begin
     end;
 end;
 
-procedure TAMPersists.Write(TextIO: TTextIO);
-begin
-  raise Exception.Create('TAMPersists.Write called directly');
-end;
+//procedure TAMPersists.Write(TextIO: TTextIO);
+//begin
+//  //raise Exception.Create('TAMPersists.Write called directly');
+//end;
 
 end.
 

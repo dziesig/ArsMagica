@@ -2,6 +2,9 @@
 
   Copyright (C) 1995..2017 by Donald R. Ziesig donald@ziesig.org
 
+  This code is derived from the various "MagicLibraryYYYY"s by the same author.
+  It has been Refactored to separate non-gui and gui modules.
+
   This source is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free
   Software Foundation; either version 2 of the License, or (at your option)
@@ -35,12 +38,18 @@ type
   { TAMList }
 
   generic TAMList< Elem > = class(TObjectList)
+  private
+    function  GetElem( Idx : Integer ) : Elem;
+    function GetExists( Idx : Integer ) : Boolean;
     public
       constructor Create;
       destructor  Destroy; override;
 
       function Add( Item : Elem ) : Integer;
       function Remove( Item : Elem ) : Integer;
+
+      property Elems[ Idx : Integer ] : Elem read GetElem; default;
+      property Exists[ Idx : Integer ] : Boolean read GetExists;
   end;
 
   { T1dArray }
@@ -110,7 +119,7 @@ function IsAncestor( Obj, Anc : TClass ) : Boolean;
 type
   generic TStack<T> = class
   private
-    SP : Integer;
+    fSP : Integer;
     Stack : array of T;
   public
     constructor Create;  virtual;
@@ -118,9 +127,40 @@ type
 
     procedure Push( Value : T ); virtual;
     function  Pop : T; virtual;
+    function  Top : T; virtual;
     procedure Reset;
+    procedure Dump( Heading : String ); virtual;
+    property SP : Integer read fSP;
   end;
 
+{==============================================================================}
+{ TAMQueue }
+{==============================================================================}
+
+  generic TAMQueue< T > = class
+    private
+      fSP : Integer;
+      vStack : array of T;
+      function GetItem( Idx : Integer ) : T;
+    public
+      constructor Create;
+      destructor  Destroy; override;
+      procedure   Clear;
+      function    Count : Integer;
+      procedure   Push( anItem : T );
+      function    Pop : T;
+      function    Peek : T;
+      property    SP : Integer read FSP;
+      property    Item[ Idx: Integer ] : T read GetItem; default;
+    end;
+
+
+{==============================================================================}
+{ Walk Line                                                                    }
+{==============================================================================}
+
+function WalkLine( XX, YY, Dir, Dist : Integer ) : TPoint;
+function WalkLine( aPoint : TPoint; Dir, Dist : Integer ) : TPoint;
 
 implementation
 
@@ -147,11 +187,89 @@ begin
       ObjCR := ObjCR.ClassParent;
 end;
 
+function WalkLine(XX, YY, Dir, Dist : Integer) : TPoint;
+begin
+  Result.X := XX;
+  Result.Y := YY;
+  if Dir in [0, 1, 7] then
+    Result.Y := YY - Dist;
+  if Dir in [3,4,5] then
+    Result.Y := YY + Dist;
+  if Dir in [1,2,3] then
+    Result.X := XX + Dist;
+  if Dir in [5,6,7] then
+    Result.X := XX - Dist;
+end;
+
+function WalkLine(aPoint : TPoint; Dir, Dist : Integer) : TPoint;
+begin
+  Result := WalkLine( aPoint.X, aPoint.Y, Dir, Dist );
+end;
+
+{ TAMQueue }
+
+constructor TAMQueue.Create;
+begin
+  fSP := -1;
+  SetLength( vStack, 0 );
+
+end;
+
+procedure TAMQueue.Clear;
+begin
+  SetLength( vStack, 0);
+end;
+
+function TAMQueue.Count : Integer;
+begin
+  Result := Length( vStack );
+end;
+
+destructor TAMQueue.Destroy;
+begin
+  SetLength( vStack, 0 );
+  inherited Destroy;
+end;
+
+function TAMQueue.GetItem( Idx : Integer ) : T;
+begin
+  Result := vStack[Idx];
+end;
+
+function TAMQueue.Peek : T;
+begin
+  if SP < 0 then
+    raise Exception.Create( 'TAMQueue Peek underflow' );
+  Result := vStack[0];
+end;
+
+function TAMQueue.Pop : T;
+var
+  I : Integer;
+  L : Integer;
+begin
+  if SP < 0 then
+    raise Exception.Create( 'TAMQueue Pop underflow' );
+  Result := vStack[0];
+  L := Length( vStack );
+  for I := 1 to L-1  do
+    vStack[I-1] := vStack[I];
+  SetLength( vStack, L-1 );
+  Dec( fSP );
+end;
+
+procedure TAMQueue.Push(anItem : T);
+begin
+  Inc( fSP );
+  SetLength( vStack, fSP+1 );
+  vStack[SP] := anItem;
+end;
+
 { TAMList }
 
 constructor TAMList.Create;
 begin
-  inherited Create(False);
+  inherited;
 end;
 
 function TAMList.Add(Item : Elem) : Integer;
@@ -176,6 +294,16 @@ end;
 destructor TAMList.Destroy;
 begin
   inherited Destroy;
+end;
+
+function TAMList.GetElem(Idx : Integer) : Elem;
+begin
+  Result := Elem( Items[Idx] );
+end;
+
+function TAMList.GetExists( Idx : Integer ) : Boolean;
+begin
+  Result := Assigned( Items[Idx] );
 end;
 
 function TAMList.Remove(Item : Elem) : Integer;
@@ -375,11 +503,11 @@ const
 var
   I : Integer;
 begin
-  SP := -1;
+  fSP := -1;
   SetLength(Stack,InitialListSize);
-  for I := 0 to pred(InitialListSize) do
-    if Stack[i] <> 0 then
-      raise EListError.Create('non 0 in creation of Stack');
+  //for I := 0 to pred(InitialListSize) do
+  //  if Stack[i] <> 0 then
+  //    raise EListError.Create('non 0 in creation of Stack');
 end;
 
 destructor TStack.Destroy;
@@ -388,9 +516,13 @@ begin
   inherited Destroy;
 end;
 
+procedure TStack.Dump(Heading : String);
+begin
+end;
+
 procedure TStack.Push(Value: T);
 begin
-  Inc(SP);
+  Inc(fSP);
   if SP >= Length(Stack) then
     SetLength(Stack,Length(Stack)*2);
   Stack[SP] := Value;
@@ -398,15 +530,22 @@ end;
 
 procedure TStack.Reset;
 begin
-  SP := -1;
+  fSP := -1;
+end;
+
+function TStack.Top : T;
+begin
+  if SP < 0 then
+    raise EListError.Create('Stack Underflow (Top)');
+  Result := Stack[SP];
 end;
 
 function TStack.Pop: T;
 begin
   if SP < 0 then
-    raise EListError.Create('Stack Underflow');
+    raise EListError.Create('Stack Underflow (Pop)');
   Result := Stack[SP];
-  Dec(SP);
+  Dec(fSP);
 end;
 
 end.

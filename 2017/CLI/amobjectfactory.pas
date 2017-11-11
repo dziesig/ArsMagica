@@ -53,6 +53,9 @@ var
   ObjectFactory : TObjectFactory;
 
 implementation
+
+uses
+  AMDebug;
 { TObjectFactory }
 
 function TObjectFactory.GetCount: Integer;
@@ -71,11 +74,8 @@ begin
 end;
 
 procedure TObjectFactory.RegisterClass(aClass: TClass);
-//var
-//  //I : Integer;
-//  aClassName : String; // For Debug
 begin
-  //aClassName := aClass.ClassName;
+  //Debug( 'TObjectFactory.RegisterClass: [%s]',[aClass.ClassName] );
   SetLength(fClassList,Length(fClassList) + 1);
   fClassList[Length(fClassList)-1] := aClass;
 end;

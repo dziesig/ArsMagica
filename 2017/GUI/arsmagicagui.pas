@@ -8,8 +8,8 @@ unit arsmagicagui;
 interface
 
 uses
-  AMFormPanel, AMHelpAboutUnit, AMAboutFormUnit, AMMessages, 
-  AMGraphicsAppMainFormUnit, AMSignalPanel, LazarusPackageIntf;
+  AMFormPanel, AMHelpAboutUnit, AMAboutFormUnit, AMMessages, AMSignalPanel, 
+  AMModalFormPanel, AMFormUtils, LazarusPackageIntf;
 
 implementation
 
@@ -18,6 +18,7 @@ begin
   RegisterUnit('AMFormPanel', @AMFormPanel.Register);
   RegisterUnit('AMHelpAboutUnit', @AMHelpAboutUnit.Register);
   RegisterUnit('AMSignalPanel', @AMSignalPanel.Register);
+  RegisterUnit('AMModalFormPanel', @AMModalFormPanel.Register);
 end;
 
 initialization

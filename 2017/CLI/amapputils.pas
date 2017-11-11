@@ -32,6 +32,10 @@ uses
 { Returns (after creating, if necessary) the path to the Default Save Location }
 { for this App.                                                                }
 function DefaultSaveLocation( AppName : String = ''; WorkingDir : String = '' ): string;
+{ Returns (after creating, if necessary) the path to the Default Data Location }
+{ for this App.                                                                }
+
+function DefaultDataLocation( AppBaseName : String; WorkingDir : String = ''  ) : String;
 
 { This is here because even after using TurboPascal from version 1.0 til now,  }
 { I never can remember if it is ParamStr(0) or ParamStr[0].                    }
@@ -54,6 +58,20 @@ begin
     Result := Result + ApplicationName + DirectorySeparator
   else
     Result := Result + AppName + DirectorySeparator;
+  if not Empty( WorkingDir ) then
+    Result := Result + WorkingDir + DirectorySeparator;
+
+  if not DirectoryExists( Result ) then
+    ForceDirectories( Result );
+end;
+
+function DefaultDataLocation(AppBaseName : String; WorkingDir : String) : String;
+begin
+  Result := GetUserDir;
+  if Empty( AppBaseName ) then
+    Result := Result + 'Data' + DirectorySeparator
+  else
+    Result := Result + AppBaseName + DirectorySeparator;
   if not Empty( WorkingDir ) then
     Result := Result + WorkingDir + DirectorySeparator;
 

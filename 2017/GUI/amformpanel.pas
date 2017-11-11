@@ -201,6 +201,7 @@ procedure TCustomFormPanel.SetForm(AValue: TForm);
 var
   I : Integer;
   Event : TNotifyEvent;
+  C : TColor; // For debug
 begin
   if fForm = AValue then
     exit;
@@ -218,6 +219,8 @@ begin
       begin
         GetCenteringData;
         LoadSourceControls;
+        C := fForm.Color;
+        Color := fForm.Color;
       end;
   finally
     Visible := True;
@@ -226,7 +229,6 @@ begin
         Event := fForm.OnShow;
         if Assigned( Event ) then
           Event( Self );
-
       end;
   end;
 end;

@@ -8,8 +8,13 @@
       <SearchPaths>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
+      <Linking>
+        <Debugging>
+          <DebugInfoType Value="dsDwarf2"/>
+        </Debugging>
+      </Linking>
     </CompilerOptions>
-    <Files Count="8">
+    <Files Count="9">
       <Item1>
         <Filename Value="amformpanel.pas"/>
         <HasRegisterProc Value="True"/>
@@ -37,14 +42,19 @@
         <Type Value="LFM"/>
       </Item6>
       <Item7>
-        <Filename Value="amgraphicsappmainformunit.pas"/>
-        <UnitName Value="AMGraphicsAppMainFormUnit"/>
-      </Item7>
-      <Item8>
         <Filename Value="amsignalpanel.pas"/>
         <HasRegisterProc Value="True"/>
         <UnitName Value="AMSignalPanel"/>
+      </Item7>
+      <Item8>
+        <Filename Value="ammodalformpanel.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="AMModalFormPanel"/>
       </Item8>
+      <Item9>
+        <Filename Value="amformutils.pas"/>
+        <UnitName Value="amformutils"/>
+      </Item9>
     </Files>
     <RequiredPkgs Count="4">
       <Item1>

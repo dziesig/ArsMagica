@@ -206,7 +206,7 @@ var
   Item   : TTestIndexItem;
 begin
   Index0 := nil;
-  Index0 := TSecondaryIndex.Create( 1 );
+  Index0 := TSecondaryIndex.Create( 1, 'XXX' );
 
   Item := TTestIndexItem.Create;
   Item.Name := 'One';
@@ -228,7 +228,7 @@ procedure TestAddAndRemoveIndexItems;
     //ID     : Integer;
     //OK     : Boolean;
   begin
-    Index0 := TSecondaryIndex.Create( Idx );
+    Index0 := TSecondaryIndex.Create( Idx,'TTT' );
 
     Item   := TTestIndexItem.Create;
     Item.Name := 'C';
@@ -339,21 +339,21 @@ begin
 
   ATable.Current;
 
-  ATable.Index := '';
-  ATable.Current;
-  ATable.Index := 'forward';
-  ATable.Current;
-  ATable.Index := 'Reverse';
-  ATable.Current;
+  //ATable.Index := '';
+  //ATable.Current;
+  //ATable.Index := 'forward';
+  //ATable.Current;
+  //ATable.Index := 'Reverse';
+  //ATable.Current;
 
   try
-    ATable.Index := 'invalid';
+    //ATable.Index := 'invalid';
     raise Exception.Create('Setting ATable.Index to ''invalid'' succeeded.  It shouldn''t have');
   except
     Debug('Invalid index test passed');
   end;
 
-  ATable.Index := '';
+  //ATable.Index := '';
   Item := TTestIndexItem(ATable.First);
   T := 'As Entered, First';
   E := 'Y';
@@ -393,7 +393,7 @@ begin
     raise Exception.CreateFmt('%s - expected [%s], got [%s]',[T,E,A]);
 //  Debug('Last - Item.Name = %s, expected %s',[Item.Name,'X']);
 
-  ATable.Index := 'forward';
+  //ATable.Index := 'forward';
   Item := TTestIndexItem(ATable.First);
   T := 'Forward First';
   E := 'V';
@@ -433,7 +433,7 @@ begin
     raise Exception.CreateFmt('%s - expected [%s], got [%s]',[T,E,A]);
   //Debug('Last - Item.Name = %s, expected %s',[Item.Name,'Z']);
 
-  ATable.Index := 'reverse';
+  //ATable.Index := 'reverse';
   Item := TTestIndexItem(ATable.First);
   T := 'Reverse First';
   E := 'Z';
@@ -496,8 +496,8 @@ begin
       ATable.Add(Item);
     end;
 
-  ATable.Index := 'Reverse';
-  ATable.Index := '';
+  //ATable.Index := 'Reverse';
+  //ATable.Index := '';
   ATable.First;    // G
   ATable.Next;     // I
   ATable.Next;;    // H
@@ -509,7 +509,7 @@ begin
   if E <> A then
     raise Exception.CreateFmt('%s - expected [%s], got [%s]',[T,E,A]);
 
-  ATable.Index := 'Forward';
+  //ATable.Index := 'Forward';
 
   Item := ATable.Current;
   E := 'C';
@@ -525,7 +525,7 @@ begin
     raise Exception.CreateFmt('%s - expected [%s], got [%s]',[T,E,A]);
 
 
-  ATable.Index := 'Reverse';
+  //ATable.Index := 'Reverse';
 
   Item := ATable.Current;
   E := 'D';
@@ -596,7 +596,7 @@ begin
   //Debug('total: %d',[I]);
 
   //Debug('--------------- forward first-last');
-  ATable.Index := 'Forward';
+  //ATable.Index := 'Forward';
   Item := ATable.First;
   I := 0;
   while not ATable.EOF do
@@ -629,7 +629,7 @@ begin
   if A <> 'A' then
     raise Exception.CreateFmt('Forward order BOF last item [%s], should be A',[A]);
 
-  ATable.Index := 'reverse';
+  //ATable.Index := 'reverse';
   Item := ATable.First;
   I := 0;
   while not ATable.EOF do
@@ -689,7 +689,7 @@ begin
   SearchItem1.Name := 'G';
 
   try
-    ATable.Index := 'Forward';
+    //ATable.Index := 'Forward';
     Item := ATable.Find( SearchItem0 );
 
     if not Assigned( Item ) then
@@ -698,7 +698,7 @@ begin
     if Item.Name <> 'D' then
       raise Exception.CreateFMT('ATable.Find:  got [%s], expected [%s]',[Item.Name,SearchItem0.Name]);
 
-    ATable.Index := 'Forward';
+    //ATable.Index := 'Forward';
     Item := ATable.Find( SearchItem0 );
 
     if not Assigned( Item ) then
@@ -810,8 +810,8 @@ begin
   BTable := TTable.Load( Input ) as TTable;
   Input.Free;
 
-  ATable.Index := '';
-  BTable.Index := '';
+  //ATable.Index := '';
+  //BTable.Index := '';
 
   for I := 0 to pred(ATable.Count) do
     begin
@@ -823,8 +823,8 @@ begin
                                   [ItemA.Name,ItemB.Name] );
     end;
 
-  ATable.Index := 'Forward';
-  BTable.Index := 'Forward';
+  //ATable.Index := 'Forward';
+  //BTable.Index := 'Forward';
 
   for I := 0 to pred(ATable.Count) do
     begin
@@ -836,8 +836,8 @@ begin
                                   [ItemA.Name,ItemB.Name] );
     end;
 
-  ATable.Index := 'Reverse';
-  BTable.Index := 'Reverse';
+  //ATable.Index := 'Reverse';
+  //BTable.Index := 'Reverse';
 
   for I := 0 to pred(ATable.Count) do
     begin

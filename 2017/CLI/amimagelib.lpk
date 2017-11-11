@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="4">
+    <Name Value="AMImageLib"/>
+    <Type Value="RunAndDesignTime"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <SearchPaths>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <Linking>
+        <Debugging>
+          <DebugInfoType Value="dsDwarf2"/>
+        </Debugging>
+      </Linking>
+    </CompilerOptions>
+    <Files Count="3">
+      <Item1>
+        <Filename Value="amhistogramunit.pas"/>
+        <UnitName Value="AMHistogramUnit"/>
+      </Item1>
+      <Item2>
+        <Filename Value="amimagebaseunit.pas"/>
+        <UnitName Value="amimagebaseunit"/>
+      </Item2>
+      <Item3>
+        <Filename Value="amimageunit.pas"/>
+        <UnitName Value="amimageUnit"/>
+      </Item3>
+    </Files>
+    <RequiredPkgs Count="3">
+      <Item1>
+        <PackageName Value="arsmagicagui"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="LCLBase"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="FCL"/>
+      </Item3>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>

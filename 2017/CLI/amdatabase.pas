@@ -1,3 +1,25 @@
+{ A Database that vaguely resembles the Borland Paradox interface.
+
+  Copyright (C) 1995..2017 by Donald R. Ziesig donald@ziesig.org
+
+  This code is derived from the various "MagicLibraryYYYY"s by the same author.
+  It has been Refactored to separate non-gui and gui modules.
+
+  This source is free software; you can redistribute it and/or modify it under
+  the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
+  any later version.
+
+  This code is distributed in the hope that it will be useful, but WITHOUT ANY
+  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+  FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+  details.
+
+  A copy of the GNU General Public License is available on the World Wide Web
+  at <http://www.gnu.org/copyleft/gpl.html>. You can also obtain it by writing
+  to the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
+  Boston, MA 02110-1335, USA.
+}
 unit AMDatabase;
 
 {$mode objfpc}{$H+}
@@ -5,10 +27,17 @@ unit AMDatabase;
 interface
 
 uses
-  Classes, SysUtils, AMPersists, Contnrs, AMTextIO;
+  Classes, SysUtils, AMPersists, Contnrs,
+  AMTextIO, AMCompSci;
 
 type
   TDBFind = (dbfExact, dbfFirst, dbfLast);
+
+  TIndexStackItem = record
+    Low, High, Current : Integer;
+  end;
+
+  TIndexStack = specialize TStack< TIndexStackItem >;
 
   { TAMIndex }
 
@@ -22,6 +51,8 @@ type
     procedure SetItems(Idx : Integer; AValue: TAMPersists);
     procedure SetOwnsObjects(AValue: Boolean);
   private
+    fName : String;
+    FStack : TIndexStack;
     // These methods are private so that they may only be accessed within the
     // AMDatabase unit.  Specifically they are used by TAMDatabase itself
       function Extract( Item : TAMPersists ) : TAMPersists; // Caution, does not free Item
@@ -40,13 +71,16 @@ type
     function BinarySearch( Item : TAMPersists; Kind : TDBFind ) : Integer;
     // Callers of AMDatabase are not allowed write access
     property OwnsObjects : Boolean read GetOwnsObjects write SetOwnsObjects;
-
+    property Stack : TIndexStack read FStack;
   public
-    constructor Create( FreeObjects : Boolean);
+    constructor Create( FreeObjects : Boolean; aName : String );
     destructor Destroy; override;
     function BOF : Boolean;
     function EOF : Boolean;
     function Current : TAMPersists;
+
+    procedure Push;
+    procedure Pop;
 
     function IndexOfItem( Item : TAMPersists ) : Integer; // Position at which Item is found.
     function IndexOf( Item : TObject ) : Integer;
@@ -67,6 +101,7 @@ type
 
     property Items[Idx : Integer] : TAMPersists read GetItems write SetItems;
 
+    property Name : String read fName;
   end;  // TAMindex
 
   { TPrimaryIndex }
@@ -92,7 +127,7 @@ type
     function Seek( Id : Cardinal ) : Integer; override;
     procedure Sort;
   public
-    constructor Create( Idx : Integer = 0 );
+    constructor Create( Idx : Integer; aName : String );
 
     function Add( Item : TAMPersists ) : Integer; overload;
     function Update( Item : TAMPersists ) : Integer;
@@ -102,10 +137,20 @@ type
   end;// TSecondaryIndex
 
 
-
   { TAMTable }
 
+  TIndexNameStackBase = specialize TStack< String >;
+
+  { TIndexNameStack }
+
+  TIndexNameStack = class( TIndexNameStackBase )
+    public
+      procedure Dump( Heading : String ); override;
+  end;
+
   generic TAMTable<T : TAMPersists> = class( TAMPersists )
+  private
+    FIndexStack : TIndexNameStack;
     private
       fOnItemChanged: TNotifyEvent;
       const
@@ -120,6 +165,7 @@ type
       procedure SetIndex(AValue: String);
       procedure SetOnItemChanged(AValue: TNotifyEvent);
       //procedure SetItems(Idx : Integer; AValue: T);
+      property IndexStack : TIndexNameStack read FIndexStack;
     public
       constructor Create( aParent : TAMPersists = nil); override;
       destructor  Destroy; override;
@@ -149,11 +195,14 @@ type
 
       procedure MakeNew;  override;
 
+      procedure PushIndex( theIndexName : String );
+      procedure PopIndex;
+
       property Count : Integer read GetCount;
       property IndexName[Idx : Integer] : String read GetIndexNameL;
-      property Index : String read fIndex write SetIndex;
       property IndexIdx : Integer read fIndexIdx;
       property Items[Idx : Integer] : T read GetItems;
+      property Index : String read fIndex write SetIndex;
 
       property OnItemChanged : TNotifyEvent read fOnItemChanged write SetOnItemChanged;
     end;
@@ -162,8 +211,20 @@ type
 implementation
 
 uses
-  AMDebug,
+  AMDebug, AMStrings,
   Math;
+
+{ TIndexNameStack }
+
+procedure TIndexNameStack.Dump(Heading : String);
+var
+  I : Integer;
+begin
+  DebugLn( Heading );
+  for I := SP downto 0 do
+    DebugLn(Format( '%2d:  [%s]',[I,Stack[I]] ));
+  DebugLn( '========================' );
+end;
 
 { TAMTable }
 
@@ -175,6 +236,10 @@ var
 begin
   inherited Create(aParent);
   fVersion := TheVersion;
+  fIndexIdx := 0;
+  fIndexStack := TIndexNameStack.Create;
+  PushIndex( '' );
+  //fIndexStack.Dump('TAMTable.Create');
 end;
 
 destructor TAMTable.Destroy;
@@ -182,8 +247,12 @@ var
   I, J : Integer;
   L : TObjectList;
 begin
-  //Debug('TAMTable.Destroy');
+  //if IndexStack.SP >= 0 then
+  //  PopIndex;
+  //fIndexStack.Dump('TAMTable.Destroy');
   Indices.Free;
+  if Assigned( fIndexStack ) then
+    fIndexStack.Free;
   inherited Destroy;
 
 end;
@@ -256,6 +325,7 @@ end;
 
 function TAMTable.First: T;
 begin
+  //Debug('First IndexIdx:  %d',[fIndexIdx]);
   Result := T(TAMIndex( Indices.Objects[fIndexIdx] ).First);
 end;
 
@@ -297,20 +367,59 @@ begin
   for I := 1 to T.IndexCount do
     begin
       N := T.IndexName(I);
-      TheIndex := TSecondaryIndex.Create(I);
+      TheIndex := TSecondaryIndex.Create(I,N);
       Indices.AddObject( N, TheIndex );
     end;
-
+  if Assigned( IndexStack ) then;
 end;
 
 function TAMTable.Next: T;
 begin
+  //Debug('Next IndexIdx:  %d',[fIndexIdx]);
   Result := T(TAMIndex( Indices.Objects[fIndexIdx] ).Next);
+end;
+
+procedure TAMTable.PopIndex;
+var
+  I : Integer;
+  N : String;
+begin
+  //IndexStack.Dump( ' Before PopIndex' );
+{$Define USE_ORIGINAL}
+{$ifdef USE_ORIGINAL}  // 2017-10-03
+  IndexStack.Pop;
+  N := IndexStack.Top;
+//{$else}
+//  N := IndexStack.Pop;
+{$endif}
+  //Debug('Popping index [%10s]',[N]);
+  SetIndex( N );
+  for I := 0 to pred( Indices.Count ) do
+    TAMIndex( Indices.Objects[I] ).Pop;
+  //IndexStack.Dump( ' After PopIndex' );
 end;
 
 function TAMTable.Prev: T;
 begin
   Result := T(TAMIndex( Indices.Objects[fIndexIdx] ).Prev);
+end;
+
+procedure TAMTable.PushIndex( theIndexName : String);
+var
+  I : Integer;
+  //S : String;
+begin
+  //IndexStack.Dump( ' Before PushIndex' );
+  //if IndexStack.SP < 0 then
+  //  S := 'EMPTY'
+  //else
+  //  S := IndexStack.Top;
+  //DEbug('Pushing index [%s] from [%s]',[theIndexName, S] );
+  IndexStack.Push( theIndexName );
+  for I := 0 to pred( Indices.Count ) do
+    TAMIndex( Indices.Objects[I] ).Push;
+  SetIndex( theIndexName );
+  //IndexStack.Dump( ' After PushIndex' );
 end;
 
 procedure TAMTable.Read(TextIO: TTextIO; aVersion: Integer);
@@ -351,10 +460,14 @@ var
   C : TAMPersists;
   Idx : Integer;
 begin
-  if fIndex=AValue then Exit;
+  if (fIndex=AValue) and (fIndex <> '') then Exit;
   C := TAMPersists(Current);
   fIndex:=AValue;
+  //for Idx := 0 to pred(Indices.Count) do
+  //  Debug( 'Index[%d]: [%s]',[Idx,Indices.Strings[Idx]] );
   Idx := Indices.IndexOf( fIndex );
+  if ( Idx < 1) and (not Empty( AValue )) then
+    raise Exception.Create( 'Oh SHIT');
   if Idx < 0 then
     raise Exception.CreateFmt('Setting undefined Index: "%s"',[AValue]);
   fIndexIdx := Idx;
@@ -424,12 +537,20 @@ end;
 var
   IndexInstanceCount : Integer;
 
-constructor TAMIndex.Create(FreeObjects: Boolean);
+constructor TAMIndex.Create(FreeObjects: Boolean; aName : String);
+var
+  Idx : TIndexStackItem;
 begin
-  inherited;
+  inherited Create(FreeObjects);
+  fName := aName;
   VLow := 0;
   VHigh := -1;
   Inc(IndexInstanceCount);
+  fStack := TIndexStack.Create;
+  Idx.High := -1;
+  Idx.Low  := 0;
+  Idx.Current := -1;
+  fStack.Push( Idx );
   //Debug('IndexInstanceCount ++ :  %d',[indexInstanceCount]);
 end;
 
@@ -438,10 +559,10 @@ var
   L, R, M : Integer;
   C : Integer;
 begin
-  //Debug('BinarySearch:  %d',[Count]);
+  //DebugLn(Format('BinarySearch:  %d',[Count]));
   if Count <= 0 then
     begin
-      Debug('BinarySearch: Table empty');
+      //Debug('BinarySearch: Table empty');
       Result := -1;
       exit;
     end;
@@ -458,7 +579,7 @@ begin
       else
         break;
     end;
-  //Debug('C:  %d,  M:  %d',[C, M] );
+  //DebugLn(Format('C:  %d,  M:  %d',[C, M] ));
   if C = 0 then
     case Kind of
       dbfExact : Result := M;
@@ -533,6 +654,7 @@ end;
 function TAMIndex.BOF: Boolean;
 begin
   Result := (vCurrentItem < vLow) or (vCurrentItem < 0);
+  //Debug( 'BOF High, Low, Current %d, %d, %d = %d',[vHigh,vLow,vCurrentItem,ord(Result)] );
 end;
 
 procedure TAMIndex.ClearRange;
@@ -559,6 +681,7 @@ end;
 destructor TAMIndex.Destroy;
 begin
   Dec(IndexInstanceCount);
+  Stack.Free;
   //Debug('IndexInstanceCount --:  %d',[indexInstanceCount]);
   //Debug('Count: %d',[Count]);
   inherited Destroy;
@@ -567,6 +690,7 @@ end;
 function TAMIndex.EOF: Boolean;
 begin
   Result := (vCurrentItem > vHigh) or (vCurrentItem < 0);
+  //Debug( 'EOF High, Current %d %d = %d',[vHigh,vCurrentItem,ord(Result)] );
 end;
 
 function TAMIndex.Extract(Item: TAMPersists): TAMPersists;
@@ -589,9 +713,9 @@ end;
 
 function TAMIndex.First: TAMPersists;
 begin
-  if vHigh >= vLow then
+  if (vHigh >= vLow) and (vLow >= 0) then
     begin
-      //Debug( 'First:  %d',[vLow]);
+      //Debug( 'First:  %d >= %d',[vHigh,vLow]);
       Result := Items[vLow];
       vCurrentItem := vLow;
     end
@@ -605,6 +729,7 @@ end;
 function TAMIndex.GetItems(Idx : Integer): TAMPersists;
 begin
   //Debug('TAMIndex.GetItems(%d)',[Idx]);
+  Result := nil;
   if Idx < 0 then
     Debug('Hell');
   try
@@ -637,7 +762,7 @@ end;
 
 function TAMIndex.Last: TAMPersists;
 begin
-  if vHigh >= vLow then
+  if (vHigh >= vLow) and (vHigh >= 0) then
     begin
       Result := Items[ vHigh ];
       vCurrentItem :=  vHigh;
@@ -647,6 +772,7 @@ begin
       Result := nil;
       vCurrentItem := -1;
     end;
+  //Debug( 'Last High, Low, Current %d %d %d',[vHigh,vLow,vCurrentItem] );
 end;
 
 function TAMIndex.Next: TAMPersists;
@@ -655,10 +781,35 @@ begin
   Result := Current;
 end;
 
+procedure TAMIndex.Pop;
+var
+  Idx : TindexStackItem;
+begin
+  Idx := Stack.Pop;
+  //Idx := Stack.Top;
+  vLow := Idx.Low;
+  vHigh := Idx.High;
+  vCurrentItem := Idx.Current;
+  //Debug( '%10s Index.Pop  SP: %d, High %d, Low %d, Current %d',
+  //       [fName, Stack.SP, vHIgh, vLow, vCurrentItem] );
+end;
+
 function TAMIndex.Prev: TAMPersists;
 begin
   Dec(vCurrentItem);
   Result := Current;
+end;
+
+procedure TAMIndex.Push;
+var
+  Idx : TindexStackItem;
+begin
+  Idx.Low     := vLow;
+  Idx.High    := vHigh;
+  Idx.Current := vCurrentItem;
+  Stack.Push( Idx );
+  //Debug( '%10s Index.Push  SP: %d, High %d, Low %d, Current %d',
+  //       [fName, Stack.SP, vHIgh, vLow, vCurrentItem] );
 end;
 
 function TAMIndex.Remove(Index: Integer): Integer;
@@ -705,7 +856,7 @@ end;
 
 constructor TPrimaryIndex.Create(Idx: Integer);
 begin
-  inherited Create(True);
+  inherited Create(True,'Primary');
   if Idx <> 0 then
     raise Exception.CreateFmt('TPrimaryIndex Idx = %d.  It MUST be 0',[Idx]);
   vIndex := 0;
@@ -760,9 +911,9 @@ end;
 
 { TSecondaryIndex }
 
-constructor TSecondaryIndex.Create(Idx: Integer);
+constructor TSecondaryIndex.Create(Idx: Integer; aName : String);
 begin
-  inherited Create(False);
+  inherited Create(False,aName);
   if Idx <= 0 then
     raise Exception.CreateFmt('TSecondaryIndex Idx = %d.  It MUST be > 0',[Idx]);
   vIndex := Idx;
