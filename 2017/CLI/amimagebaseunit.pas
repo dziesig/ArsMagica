@@ -103,12 +103,15 @@ type
     constructor Create( theWidth, theHeight : Cardinal; thePixSize : Word;
                         thePixelType : String );
     constructor Create( theSource : TAMImageBase );
+    constructor Create( TextIO : TTextIO; aParent : TAMPersists = nil ); override;
 
     function PixVal( X, Y : Integer ) : String; virtual; abstract;
 
     procedure Read( TextIO : TTextIO; aVersion : Integer ); override;
     procedure Write( TextIO : TTextIO ); override;
     procedure DebugOut( Path : String );
+
+    function  ToString : String; override;
 
 
     // Changing Height width or pixsize erases all contents
@@ -193,6 +196,11 @@ begin
         Dump( theSource.vPixels[X,Y],sizeof(double) );
         Move( theSource.vPixels[X,Y], vPixels[X, Y], fPixSize );
       end;
+end;
+
+constructor TAMImageBase.Create(TextIO : TTextIO; aParent : TAMPersists);
+begin
+  inherited Create(TextIO,aParent);
 end;
 
 procedure TAMImageBase.DebugOut(Path : String);
@@ -483,6 +491,12 @@ begin
   if fWidth = AValue then Exit;
   fWidth := AValue;
   Initialize;
+end;
+
+function TAMImageBase.ToString : String;
+begin
+  Result := 'TAMImageBase';
+  //Result := inherited ToString;
 end;
 
 procedure TAMImageBase.Write(TextIO : TTextIO);

@@ -65,10 +65,13 @@ type
                           // constructor to be a value > 0
     function GetIndexName(Idx : Integer): String; virtual;
     function  IsModified : Boolean; virtual;
-  public
+
+    procedure CheckEndClass(FileClass, ExpectedClass: String; TextIO : TTextIO);
+    procedure CheckStartClass(var FileClass : String; TextIO : TTextIO);
+public
     DebugString : String;
     constructor Create( aParent : TAMPersists = nil); virtual;
-    constructor Create( TextIO : TTextIO; aParebt : TAMPersists = nil ); virtual;
+    constructor Create( TextIO : TTextIO; aParent : TAMPersists = nil ); virtual;
     destructor  Destroy; override;
     procedure   MakeNew; virtual; // Initialize new instances.  Particularly useful
                                   // for handling reading older versions of the object
@@ -117,6 +120,7 @@ type
   end;
 
   PAMPersists = ^TAMPersists;
+  TAMPersistsClass = class of TAMPersists;
 
   EModifingID       = Exception;
   ENonExistentIndex = Exception;
@@ -143,6 +147,40 @@ begin
   Dest.Parent := Parent;
 end;
 
+procedure TAMPersists.CheckEndClass(FileClass, ExpectedClass : String;
+  TextIO : TTextIO);
+var
+  Cls : String;
+  Len : Integer;
+  Line : Integer;
+  H, T : String;
+begin
+  Len := Length( FileClass );
+  Cls := Copy( FileClass,3,Len-3);
+  Line := TextIO.LineNo;
+  H := Copy( FileClass,1,2);
+  T := Copy( FileClass,Len,1);
+  if (H <> '</') or (T <> '>') then
+    raise EEndOfClass.CreateFmt( 'Invalid End of Class format [%s], expecting [%s] at line %d.',
+                                 [FileClass,ExpectedClass,Line] );
+  if Cls <> ExpectedClass then
+    raise EEndOfClass.CreateFmt( 'End of Class mismatch.  [%s] found, [%s] expected at line %d.',
+                                 [Cls, ExpectedClass, Line] );
+end;
+
+procedure TAMPersists.CheckStartClass(var FileClass : String; TextIO : TTextIO);
+var
+  Cls : String;
+  Len : Integer;
+begin
+  Len := Length( FileClass );
+  Cls := Copy( FileClass,2,Len-2);
+  if (Copy( FileClass,1,1) <> '<') or (Copy( FileClass,Len,1) <> '>') then
+    raise EStartOfClass.CreateFmt( 'Invalid Start of Class format [%s] at line %d.',
+                                   [FileClass, TextIO.LineNo] );
+  FileClass := Cls;
+end;
+
 function TAMPersists.Compare(ToItem: TAMPersists; Index: Integer): Integer;
 begin
   Result := Id - ToItem.Id;
@@ -159,9 +197,30 @@ begin
   MakeNew;
 end;
 
-constructor TAMPersists.Create(TextIO : TTextIO; aParebt : TAMPersists);
+constructor TAMPersists.Create(TextIO : TTextIO; aParent : TAMPersists);
+var
+  ClsName  : String;
+  S        : String;
+  aVersion : Integer;
+  anId     : Integer;
 begin
-  ;
+  aVersion := 0;
+  anId := 0;
+  S := '';
+  ClsName := self.ClassName;    // Get the expected class name
+  TextIO.ReadLn(S);             // Read the start of class
+  CheckStartClass(S, TextIO);   // Assert they are correct and of correct format
+  ClsName := S;
+  TextIO.Readln(aVersion);       // Read the Object's version
+  //Result := ObjectFactory.MakeObject( ClsName ) as TAMPersists;
+  Parent := aParent;
+  fVersion := aVersion;  // This sets the version of the newly created object.
+  TextIO.ReadLn( anId );
+  Read( TextIO, aVersion );
+  fId := anId;
+  TextIO.Readln(S);             // Read the end of class
+  CheckEndClass(S,ClsName, TextIO);     // Assert end of class is correct and of correct format
+  UNMODIFY;              // make sure this was NOT modified by the load.
 end;
 
 destructor TAMPersists.Destroy;
@@ -212,37 +271,37 @@ class function TAMPersists.Load(TextIO: TTextIO; aParent : TAMPersists ): TAMPer
     aVersion : Integer;
     anId     : Integer;
 
-    procedure CheckEndClass(FileClass, ExpectedClass: String; TextIO : TTextIO);
-    var
-      Cls : String;
-      Len : Integer;
-      Line : Integer;
-      H, T : String;
-    begin
-      Len := Length( FileClass );
-      Cls := Copy( FileClass,3,Len-3);
-      Line := TextIO.LineNo;
-      H := Copy( FileClass,1,2);
-      T := Copy( FileClass,Len,1);
-      if (H <> '</') or (T <> '>') then
-        raise EEndOfClass.CreateFmt( 'Invalid End of Class format [%s], expecting [%s] at line %d.',
-                                     [FileClass,ExpectedClass,Line] );
-      if Cls <> ExpectedClass then
-        raise EEndOfClass.CreateFmt( 'End of Class mismatch.  [%s] found, [%s] expected at line %d.',
-                                     [Cls, ExpectedClass, Line] );
-    end;
-    procedure CheckStartClass(var FileClass : String; TextIO : TTextIO);
-    var
-      Cls : String;
-      Len : Integer;
-    begin
-      Len := Length( FileClass );
-      Cls := Copy( FileClass,2,Len-2);
-      if (Copy( FileClass,1,1) <> '<') or (Copy( FileClass,Len,1) <> '>') then
-        raise EStartOfClass.CreateFmt( 'Invalid Start of Class format [%s] at line %d.',
-                                       [FileClass, TextIO.LineNo] );
-      FileClass := Cls;
-    end;
+    //procedure CheckEndClass(FileClass, ExpectedClass: String; TextIO : TTextIO);
+    //var
+    //  Cls : String;
+    //  Len : Integer;
+    //  Line : Integer;
+    //  H, T : String;
+    //begin
+    //  Len := Length( FileClass );
+    //  Cls := Copy( FileClass,3,Len-3);
+    //  Line := TextIO.LineNo;
+    //  H := Copy( FileClass,1,2);
+    //  T := Copy( FileClass,Len,1);
+    //  if (H <> '</') or (T <> '>') then
+    //    raise EEndOfClass.CreateFmt( 'Invalid End of Class format [%s], expecting [%s] at line %d.',
+    //                                 [FileClass,ExpectedClass,Line] );
+    //  if Cls <> ExpectedClass then
+    //    raise EEndOfClass.CreateFmt( 'End of Class mismatch.  [%s] found, [%s] expected at line %d.',
+    //                                 [Cls, ExpectedClass, Line] );
+    //end;
+    //procedure CheckStartClass(var FileClass : String; TextIO : TTextIO);
+    //var
+    //  Cls : String;
+    //  Len : Integer;
+    //begin
+    //  Len := Length( FileClass );
+    //  Cls := Copy( FileClass,2,Len-2);
+    //  if (Copy( FileClass,1,1) <> '<') or (Copy( FileClass,Len,1) <> '>') then
+    //    raise EStartOfClass.CreateFmt( 'Invalid Start of Class format [%s] at line %d.',
+    //                                   [FileClass, TextIO.LineNo] );
+    //  FileClass := Cls;
+    //end;
 
   begin
     aVersion := 0;
@@ -250,7 +309,7 @@ class function TAMPersists.Load(TextIO: TTextIO; aParent : TAMPersists ): TAMPer
     S := '';
     ClsName := self.ClassName;    // Get the expected class name
     TextIO.ReadLn(S);             // Read the start of class
-    CheckStartClass(S, TextIO);   // Assert they are correct and of correct format
+    //CheckStartClass(S, TextIO);   // Assert they are correct and of correct format
     ClsName := S;
     TextIO.Readln(aVersion);       // Read the Object's version
     Result := ObjectFactory.MakeObject( ClsName ) as TAMPersists;
@@ -262,7 +321,7 @@ class function TAMPersists.Load(TextIO: TTextIO; aParent : TAMPersists ): TAMPer
     Result.Read( TextIO, aVersion );
     Result.fId := anId;
     TextIO.Readln(S);             // Read the end of class
-    CheckEndClass(S,ClsName, TextIO);     // Assert end of class is correct and of correct format
+    //CheckEndClass(S,ClsName, TextIO);     // Assert end of class is correct and of correct format
     Result.UNMODIFY;              // make sure this was NOT modified by the load.
 end;
 

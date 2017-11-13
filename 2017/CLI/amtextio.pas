@@ -37,9 +37,14 @@ type
       fFile       : Text;
       fPath       : String;
 
+      AheadText   : Boolean;
+      AheadLine   : String;
+      function   GetLine : String;
     public
       constructor Create( aPath : String; Output : Boolean );
       destructor  Destroy; override;
+
+      function    ReadAhead : String;
 
       function    Readln( var Line : String; MultiLine : Boolean = False ) : Integer; overload;
       function    Readln( var Int  : Integer ) : Integer;  overload;
@@ -75,6 +80,8 @@ begin
   inherited Create;
   fLineNo := 0;
   fPath := aPath;
+  AheadLine := '';
+  AheadText := False;
   AssignFile( fFile, fPath );
   fOut := Output;
   if Output then
@@ -89,6 +96,30 @@ begin
   inherited Destroy;
 end;
 
+function TTextIO.GetLine : String;
+begin
+  if AheadText then
+    begin
+      Result := AheadLine;
+      AheadText := False;
+    end
+  else
+    begin
+      System.ReadLn( fFile, AheadLine );
+      Result := AheadLine;
+    end;
+end;
+
+function TTextIO.ReadAhead : String;
+begin
+  if AheadText then
+    raise Exception.CreateFmt( 'TextIO.ReadAhead with unused text:  <%s>',
+                               [AheadLine] );
+  AheadText := True;
+  System.ReadLn( fFile, AheadLine );
+  Result := AheadLine;
+end;
+
 function TTextIO.Readln(var Bool: Boolean): Integer;
 var
   Txt : String;
@@ -98,7 +129,8 @@ begin
   if fOut then
     raise Exception.CreateFmt( 'Attempt to read from output file %s at line %d',
                                [ExtractFileName( fPath ),fLineNo]);
-  System.ReadLn( fFile, Txt );
+  //System.ReadLn( fFile, Txt );
+  Txt := GetLine;
   Bool := Txt = 'TRUE';
 end;
 
@@ -110,7 +142,8 @@ begin
     raise Exception.CreateFmt( 'Attempt to read from output file %s at line %d',
                                [ExtractFileName( fPath ),fLineNo]);
   try
-    System.ReadLn( fFile, Card );
+    //System.ReadLn( fFile, Card );
+    ReadStr( GetLine, Card );
   except
     raise EFormatError.CreateFmt('Invalid numeric (Cardinal) format at line %d.',[fLineNo]);
   end;
@@ -123,7 +156,8 @@ begin
   if fOut then
     raise Exception.CreateFmt( 'Attempt to read from output file %s at line %d',
                                [ExtractFileName( fPath ),fLineNo]);
-  System.ReadLn( fFile, Dbl );
+  //System.ReadLn( fFile, Dbl );
+  ReadStr( GetLine, Dbl );
 end;
 
 function TTextIO.Readln(var Int: Integer): Integer;
@@ -136,7 +170,8 @@ begin
     raise Exception.CreateFmt( 'Attempt to read from output file %s at line %d',
                                [ExtractFileName( fPath ),fLineNo]);
   try
-    System.ReadLn( fFile, S );
+    //System.ReadLn( fFile, S );
+    S := GetLine;
     Int := StrToInt( S );
   except
     raise EFormatError.CreateFmt('Invalid numeric (Integer) format "%s" at line %d.',[s,fLineNo]);
@@ -167,7 +202,8 @@ begin
       if fOut then
         raise Exception.CreateFmt( 'Attempt to read from output file %s at line %d',
                                    [ExtractFileName( fPath ),fLineNo]);
-      System.ReadLn( fFile, Line );
+      //System.ReadLn( fFile, Line );
+      Line := GetLine;
     end;
 end;
 
@@ -181,7 +217,8 @@ begin
     raise Exception.CreateFmt( 'Attempt to read from output file %s at line %d',
                                [ExtractFileName( fPath ),fLineNo]);
   try
-    System.ReadLn( fFile, S );
+    //System.ReadLn( fFile, S );
+    S := GetLine;
     Wrd := StrToInt( S );
   except
     raise EFormatError.CreateFmt('Invalid numeric (Integer) format "%s" at line %d.',[s,fLineNo]);

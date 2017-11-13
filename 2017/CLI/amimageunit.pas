@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  AMImageBaseUnit;
+  AMImageBaseUnit, AMTextIO, AMPersists;
 
 type
 
@@ -22,6 +22,7 @@ type
     constructor Create( theWidth, theHeight : Cardinal ); virtual;
     constructor Create( theWidth, theHeight : Cardinal; theValue : Boolean ); virtual;
     constructor Create( theSource : TAMImageBase ); virtual;
+    constructor Create( TextIO : TTextIO; aParent : TAMPersists = nil ); override;
 
     destructor  Destroy; override;
 
@@ -316,6 +317,11 @@ end;
 constructor TAMBooleanImage.Create(theSource : TAMImageBase);
 begin
   inherited Create(theSource);
+end;
+
+constructor TAMBooleanImage.Create(TextIO : TTextIO; aParent : TAMPersists);
+begin
+  inherited Create(TextIO, aParent);
 end;
 
 destructor TAMBooleanImage.Destroy;
@@ -701,5 +707,8 @@ initialization
   ObjectFactory.RegisterClass( TAMBooleanImage );
   ObjectFactory.RegisterClass( TAMDoubleImg );
   ObjectFactory.RegisterClass( TAMShortIntImage );
+  AMPersistsFactory.RegisterClass( TAMBooleanImage );
+  AMPersistsFactory.RegisterClass( TAMDoubleImg );
+  AMPersistsFactory.RegisterClass( TAMShortIntImage );
 end.
 

@@ -198,6 +198,8 @@ type
       procedure PushIndex( theIndexName : String );
       procedure PopIndex;
 
+      procedure DebugIndex;
+
       property Count : Integer read GetCount;
       property IndexName[Idx : Integer] : String read GetIndexNameL;
       property IndexIdx : Integer read fIndexIdx;
@@ -211,7 +213,7 @@ type
 implementation
 
 uses
-  AMDebug, AMStrings,
+  AMDebug, AMStrings, AMObjectFactory,
   Math;
 
 { TIndexNameStack }
@@ -293,6 +295,14 @@ begin
     Result := nil;
 end;
 
+procedure TAMTable.DebugIndex;
+//var
+//  P : Pointer;
+begin
+  //P := Pointer(1234567);
+  Debug( 'TAMTable.DebugIndex:' );
+end;
+
 function TAMTable.Del(Item : T) : Integer;
 var
   I : Integer;
@@ -370,7 +380,9 @@ begin
       TheIndex := TSecondaryIndex.Create(I,N);
       Indices.AddObject( N, TheIndex );
     end;
-  if Assigned( IndexStack ) then;
+  if Assigned( IndexStack ) then
+    fIndexStack.Free;
+  fIndexStack := TIndexNameStack.Create;
 end;
 
 function TAMTable.Next: T;
@@ -384,7 +396,7 @@ var
   I : Integer;
   N : String;
 begin
-  //IndexStack.Dump( ' Before PopIndex' );
+  IndexStack.Dump( ' Before PopIndex' );
 {$Define USE_ORIGINAL}
 {$ifdef USE_ORIGINAL}  // 2017-10-03
   IndexStack.Pop;
@@ -393,6 +405,7 @@ begin
 //  N := IndexStack.Pop;
 {$endif}
   //Debug('Popping index [%10s]',[N]);
+  Debug('PopIndex');
   SetIndex( N );
   for I := 0 to pred( Indices.Count ) do
     TAMIndex( Indices.Objects[I] ).Pop;
@@ -409,13 +422,15 @@ var
   I : Integer;
   //S : String;
 begin
-  //IndexStack.Dump( ' Before PushIndex' );
+  Debug('PushIndex:  <%s>',[theIndexName]);
+  IndexStack.Dump( ' Before PushIndex' );
   //if IndexStack.SP < 0 then
   //  S := 'EMPTY'
   //else
   //  S := IndexStack.Top;
   //DEbug('Pushing index [%s] from [%s]',[theIndexName, S] );
-  IndexStack.Push( theIndexName );
+  //if not Assigned( fIndexStack ) then Debug( 'XXXXX:  %p',[fIndexStack] );
+  fIndexStack.Push( theIndexName );
   for I := 0 to pred( Indices.Count ) do
     TAMIndex( Indices.Objects[I] ).Push;
   SetIndex( theIndexName );
@@ -427,6 +442,7 @@ var
   vCount : Integer;
   I     : Integer;
   N     : String;
+  SP    : Integer;
   Item  : T;
 begin
   MakeNew;
@@ -438,6 +454,12 @@ begin
       TextIO.ReadLn(fIndex);
       TextIO.ReadLn(fIndexIdx);
       TextIO.ReadLn(vCount);
+      TextIO.ReadLn( SP );
+      for I := 0 to SP do
+        begin
+          TextIO.ReadLn( N );
+          fIndexStack.Push( N );
+        end;
       for I := 1 to pred(vCount) do
         begin
           TextIO.Readln(N);
@@ -447,7 +469,10 @@ begin
       TextIO.ReadLn(vCount); // Number if items in primary index
       for I := 0 to pred(vCount) do
         begin
-          Item := T(T.Load(TextIO) );
+          //Item := T(T.Load(TextIO) );
+          N := TextIO.ReadAhead;
+          N := Copy(N,2,Length(N)-2);
+          Item := T( AMPersistsFactory.MakeObject( TextIO, N ));
           Item.Id := 0;
           Add( Item );
           //Item.Free;
@@ -523,6 +548,9 @@ begin
   TextIO.WriteLn(fIndex);     // The current index's name
   TextIO.WriteLn(fIndexIdx);  // the current index's index
   TextIO.WriteLN(Indices.Count);
+  TextIO.WriteLn( fIndexStack.SP );
+  for I := 0 to fIndexStack.SP do
+    TextIO.WriteLn( fIndexStack[I] );
   for I := 1 to pred(Indices.Count) do
     TextIO.WriteLn(Indices[I]);
   // Now write the data stored in the primary index

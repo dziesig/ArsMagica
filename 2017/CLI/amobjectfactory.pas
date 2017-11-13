@@ -26,7 +26,8 @@ unit AMObjectFactory;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,
+  AMPersists, AMTextIO;
 
 type
 
@@ -49,13 +50,107 @@ type
     property    ClassList : TMagicClassArray read fClassList;
   end;
 
+  { TAMPersistsMapping }
+
+  TAMPersistsMapping = class
+  private
+    fPersistsClass : TAMPersistsClass;
+    function GetName : String;
+  public
+    constructor CreateEx( aPersistsClass : TAMPersistsClass );
+
+    property PersistsClass : TAMPersistsClass read fPersistsClass;
+    property Name : String read GetName;
+  end;
+
+  { TAMPersistsFactory }
+
+  TAMPersistsFactory = class( TStringList )
+  public
+    constructor Create;
+    destructor  Destroy; override;
+
+    procedure   RegisterClass( aClass : TAMPersistsClass );
+    function    MakeObject( TextIO : TTextIO; aName : String ) : TAMPersists; overload;
+    function    MakeObject( TextIO : TTextIO; aClass : TClass ) : TAMPersists; overload;
+  end;
+
 var
   ObjectFactory : TObjectFactory;
+  AMPersistsFactory : TAMPersistsFactory;
 
 implementation
 
 uses
   AMDebug;
+
+{ TAMPersistsMapping }
+
+constructor TAMPersistsMapping.CreateEx(aPersistsClass : TAMPersistsClass);
+begin
+  Create; // don't call inherited Create!
+  fPersistsClass := aPersistsClass;
+end;
+
+function TAMPersistsMapping.GetName : String;
+begin
+  Result := fPersistsClass.ClassName;
+end;
+
+{ TAMPersistsFactory }
+
+constructor TAMPersistsFactory.Create;
+begin
+  inherited;
+  Sorted := True;
+  Duplicates := dupError;
+  SortStyle  := sslAuto;
+  OwnsObjects := True;
+end;
+
+destructor TAMPersistsFactory.Destroy;
+begin
+  inherited Destroy;
+end;
+
+function TAMPersistsFactory.MakeObject(TextIO : TTextIO; aName : String
+  ) : TAMPersists;
+var
+  I : Integer;
+  vPersistsClass : TAMPersistsClass;
+begin
+  I := IndexOf( aName );
+  if I < 0 then
+    raise Exception.Create(aName + ' not found in Object Factory');
+  vPersistsClass := TAMPersistsMapping( Objects[I] ).PersistsClass;
+  Result := vPersistsClass.Create( TextIO );
+  Debug('Object:  %s',[Result.ToString]);
+end;
+
+function TAMPersistsFactory.MakeObject(TextIO : TTextIO; aClass : TClass
+  ) : TAMPersists;
+var
+  I : Integer;
+  vPersistsClass : TAMPersistsClass;
+  N : String;
+begin
+  N := aClass.ClassName;
+  I := IndexOf( aClass.ClassName );
+  if I < 0 then
+    raise Exception.Create(aClass.ClassName + ' not found in Object Factory');
+  vPersistsClass := TAMPersistsMapping( Objects[I] ).PersistsClass;
+  Result := vPersistsClass.Create( TextIO );
+  Debug('Object:  %s',[Result.ToString]);
+end;
+
+procedure TAMPersistsFactory.RegisterClass(aClass : TAMPersistsClass);
+var
+  vPersistsMapping : TAMPersistsMapping;
+begin
+  vPersistsMapping := TAMPersistsMapping.CreateEx( aClass);
+  AddObject(vPersistsMapping.Name, vPersistsMapping);  //S := aClass.ClassName;
+end;
+
 { TObjectFactory }
 
 function TObjectFactory.GetCount: Integer;
@@ -99,7 +194,9 @@ end;
 
 initialization
   ObjectFactory := TObjectFactory.Create;
+  AMPersistsFactory := TAMPersistsFactory.Create;
 finalization
   ObjectFactory.Free;
+  AMPersistsFactory.Free;
 end.
 

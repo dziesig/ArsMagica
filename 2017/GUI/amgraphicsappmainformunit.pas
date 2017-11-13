@@ -165,7 +165,7 @@ var
 implementation
 
 uses
-  AMAppUtils, AMMessages, AMDebug, AMFormUtils{, AMObjectFactory};
+  AMAppUtils, AMMessages, AMDebug, AMFormUtils, AMObjectFactory;
 
 {$R *.lfm}
 
@@ -304,7 +304,7 @@ procedure TMainForm.FileOpenActionExecute(Sender: TObject);
 var
   Answer : Integer;
   TextIO : TTextIO;
-  //DC     : TAMPersists;
+  DC     : TAMPersists;
   procedure DoOpen;
   begin
     OpenDialog1.InitialDir := AMAppUtils.DefaultSaveLocation(appName);
@@ -312,11 +312,10 @@ var
       begin
         if Assigned( PData^ ) then //FreeAndNil( Data );
           PData^.Free;
-        //DC := DataClass;
         TextIO := TTextIO.Create( OpenDialog1.FileName, False );
-        //PData^ := DC.Load( TextIO );
+        PData^ := AMPersistsFactory.MakeObject( TextIO, DataClass.ClassName );
+        Debug( PData^.ToString );
         TextIO.Free;
-        //Data.Open( OpenDialog1.FileName );
         DataToControls;
         FilePath := OpenDialog1.FileName;
         AfterOpen;
@@ -344,6 +343,7 @@ begin
     end
   else
     DoOpen;
+  Debug( 'FileOpenActionExecute' );
 end;
 
 procedure TMainForm.FilePreferencesActionExecute(Sender: TObject);
@@ -367,10 +367,6 @@ begin
       TextIO := OpenWrite( FilePath );
       PData^.Store( TextIO );
       TextIO.Free;
-
-      //if Assigned( AMFormPanel1.Form.OnHide ) then
-      //  AMFormPanel1.Form.OnHide(nil);
-      //Data.Save( FilePath )
     end
   else
     FileSaveAsActionExecute( Sender );
@@ -389,12 +385,6 @@ begin
       ControlsToData;
       PData^.Store( TextIO );
       TextIO.Free;
-      //if Data.Save( SaveDialog1.FileName ) then
-      //  begin
-      //    FilePath := SaveDialog1.FileName;
-      //    ControlsToData;
-      //    Data.Save( FilePath );
-      //  end;
     end;
 end;
 

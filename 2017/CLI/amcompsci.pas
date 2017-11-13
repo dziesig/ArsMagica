@@ -121,6 +121,8 @@ type
   private
     fSP : Integer;
     Stack : array of T;
+    function GetItem(Idx : Integer) : T;
+    procedure SetItem(Idx : Integer; AValue : T);
   public
     constructor Create;  virtual;
     destructor  Destroy; override;
@@ -131,6 +133,7 @@ type
     procedure Reset;
     procedure Dump( Heading : String ); virtual;
     property SP : Integer read fSP;
+    property  Item[Idx : Integer] : T read GetItem write SetItem; default;
   end;
 
 {==============================================================================}
@@ -520,6 +523,11 @@ procedure TStack.Dump(Heading : String);
 begin
 end;
 
+function TStack.GetItem(Idx : Integer) : T;
+begin
+  Result := Stack[Idx];
+end;
+
 procedure TStack.Push(Value: T);
 begin
   Inc(fSP);
@@ -531,6 +539,11 @@ end;
 procedure TStack.Reset;
 begin
   fSP := -1;
+end;
+
+procedure TStack.SetItem(Idx : Integer; AValue : T);
+begin
+  Stack[Idx] := AValue;
 end;
 
 function TStack.Top : T;
