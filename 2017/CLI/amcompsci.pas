@@ -168,7 +168,8 @@ function WalkLine( aPoint : TPoint; Dir, Dist : Integer ) : TPoint;
 implementation
 
 uses
-  Math;
+  Math,
+  AMDebug;
 
 {==============================================================================}
 { Inheritance tests                                                            }
@@ -323,6 +324,7 @@ constructor T2dArray.Create(Rows, Cols: Integer; aNull: Elem);
 begin
   SetLength( Data, Rows, Cols );
   Null := ANull;
+  Debug('T2dArray.Create');
 end;
 
 procedure T2dArray.Clear;
@@ -367,6 +369,7 @@ end;
 
 function T2dArray.GetItem(I, J: Integer): Elem;
 begin
+  //Debug('T2dArray.GetItem[%d,%d]',[I,J]);
   Result := Data[I,J];
 end;
 

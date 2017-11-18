@@ -66,6 +66,7 @@ type
       //function Remove( Item : TAMPersists ) : Integer; overload; // Frees the Item
 
       function Seek( Id : Cardinal ) : Integer; virtual; abstract;
+      procedure Sort; virtual;
   protected
     vIndex : Integer;
     function BinarySearch( Item : TAMPersists; Kind : TDBFind ) : Integer;
@@ -98,6 +99,7 @@ type
 
     function Remove( Index : Integer ) : Integer;  overload; // Frees the Item
     function Remove( Item : TAMPersists ) : Integer; overload; // Frees the Item
+    function Update( Item : TAMPersists ) : Integer; virtual;
 
     property Items[Idx : Integer] : TAMPersists read GetItems write SetItems;
 
@@ -125,12 +127,12 @@ type
   private
     function GetOwnsObjects : Boolean;
     function Seek( Id : Cardinal ) : Integer; override;
-    procedure Sort;
+    procedure Sort;  override;
   public
     constructor Create( Idx : Integer; aName : String );
 
     function Add( Item : TAMPersists ) : Integer; overload;
-    function Update( Item : TAMPersists ) : Integer;
+    function Update( Item : TAMPersists ) : Integer; override;
 
     property OwnsObjects : Boolean read GetOwnsObjects;
 
@@ -159,6 +161,9 @@ type
         fIndex: String;
         fIndexIdx : Integer;
         Indices : TStringList;
+
+        ISCount : Integer;
+
       function GetCount: Integer;
       function GetIndexNameL( Idx : Integer ) : String;
       function GetItems(Idx : Integer): T;
@@ -230,16 +235,24 @@ end;
 
 { TAMTable }
 
+//var
+//  ISCount : Integer;
+
 constructor TAMTable.Create(aParent: TAMPersists);
 var
   TheIndex : TSecondaryIndex;
   I        : Integer;
   N        : String;
 begin
+  //Debug( 'TAMTable.Create %s',[Name] );
   inherited Create(aParent);
   fVersion := TheVersion;
   fIndexIdx := 0;
-  fIndexStack := TIndexNameStack.Create;
+  MakeNew;
+  //fIndexStack := nil;
+  //fIndexStack := TIndexNameStack.Create;
+  //Inc( ISCOunt );
+  //Debug( 'ISCount:  %d zzzzzzz',[ISCount]);
   PushIndex( '' );
   //fIndexStack.Dump('TAMTable.Create');
 end;
@@ -254,7 +267,11 @@ begin
   //fIndexStack.Dump('TAMTable.Destroy');
   Indices.Free;
   if Assigned( fIndexStack ) then
-    fIndexStack.Free;
+    begin
+      fIndexStack.Free;
+      //Dec(IsCount);
+      //Debug( 'ISCount:  %d',[ISCount]);
+    end;
   inherited Destroy;
 
 end;
@@ -276,6 +293,7 @@ end;
 
 procedure TAMTable.Clear;
 begin
+  Debug('TAMTable.Clear');
   MakeNew;
 end;
 
@@ -328,8 +346,10 @@ end;
 
 function TAMTable.Find(Item: T): T;
 begin
-  if fIndexIdx = 0 then
-    raise Exception.Create('Index required to perform "Find"');
+  //if fIndexIdx = 0 then
+    //raise Exception.Create('Index required to perform "Find"');
+    //Result := T( ).Find( Item )
+  //else
   Result := T(TAMIndex( Indices.Objects[fIndexIdx] ).Find( Item ));
 end;
 
@@ -365,6 +385,7 @@ var
   I        : Integer;
   N        : String;
 begin
+  //Debug('TAMTable.MakeNew');
   inherited MakeNew;
   if Assigned( Indices ) then
     FreeAndNil( Indices );
@@ -381,8 +402,25 @@ begin
       Indices.AddObject( N, TheIndex );
     end;
   if Assigned( IndexStack ) then
-    fIndexStack.Free;
-  fIndexStack := TIndexNameStack.Create;
+    begin
+      fIndexStack.Free;
+      fIndexStack := nil;
+      //Dec(ISCount);
+      //Debug( 'ISCount:  %d',[ISCount]);
+    end;
+  //fIndexStack := TIndexNameStack.Create;
+  //Inc( ISCount );
+  //Debug( 'ISCount:  %d',[ISCount]);
+  //PushIndex('');
+  if not Assigned( fIndexStack ) then
+    begin
+      //Debug('findexstack nil');
+      fIndexStack := TIndexNameStack.Create;
+      //Inc( ISCount );
+      //Debug( 'ISCount:  %d',[ISCount]);
+      PushIndex('');
+    end;
+  //Debug('TAMTable.MakeNew Done');
 end;
 
 function TAMTable.Next: T;
@@ -396,7 +434,7 @@ var
   I : Integer;
   N : String;
 begin
-  IndexStack.Dump( ' Before PopIndex' );
+  //IndexStack.Dump( ' Before PopIndex' );
 {$Define USE_ORIGINAL}
 {$ifdef USE_ORIGINAL}  // 2017-10-03
   IndexStack.Pop;
@@ -405,7 +443,7 @@ begin
 //  N := IndexStack.Pop;
 {$endif}
   //Debug('Popping index [%10s]',[N]);
-  Debug('PopIndex');
+  //Debug('PopIndex');
   SetIndex( N );
   for I := 0 to pred( Indices.Count ) do
     TAMIndex( Indices.Objects[I] ).Pop;
@@ -422,8 +460,8 @@ var
   I : Integer;
   //S : String;
 begin
-  Debug('PushIndex:  <%s>',[theIndexName]);
-  IndexStack.Dump( ' Before PushIndex' );
+  //Debug('PushIndex:  <%s>',[theIndexName]);
+  //IndexStack.Dump( ' Before PushIndex' );
   //if IndexStack.SP < 0 then
   //  S := 'EMPTY'
   //else
@@ -455,6 +493,7 @@ begin
       TextIO.ReadLn(fIndexIdx);
       TextIO.ReadLn(vCount);
       TextIO.ReadLn( SP );
+      fIndexStack.Reset;
       for I := 0 to SP do
         begin
           TextIO.ReadLn( N );
@@ -534,6 +573,7 @@ begin
     Add(Item)
   else
     begin
+      TPrimaryIndex( Indices.Objects[0] ).Update( Item );
       for I := 1 to pred(Indices.Count) do
         TSecondaryIndex( Indices.Objects[I] ).Update( Item );
     end;
@@ -546,18 +586,32 @@ var
   C : Integer;
 begin
   TextIO.WriteLn(fIndex);     // The current index's name
+  Debug('Writing fIndexIdx <%s>',[fIndex]);
   TextIO.WriteLn(fIndexIdx);  // the current index's index
+  Debug('current Index idx %d',[fIndexIdx]);
   TextIO.WriteLN(Indices.Count);
+  Debug('Indices.Count %d',[Indices.Count]);
   TextIO.WriteLn( fIndexStack.SP );
+  Debug('IndexStack SP %d',[fIndexStack.SP] );
   for I := 0 to fIndexStack.SP do
-    TextIO.WriteLn( fIndexStack[I] );
+    begin
+      TextIO.WriteLn( fIndexStack[I] );
+      Debug('fIndexStack[%d]:  %s',[I,fIndexStack[I]]);
+    end;
   for I := 1 to pred(Indices.Count) do
-    TextIO.WriteLn(Indices[I]);
+    begin
+      TextIO.WriteLn(Indices[I]);
+      Debug( 'Indices[%d]:  %s',[I,Indices[I]]);
+    end;
   // Now write the data stored in the primary index
   C := TAMIndex(Indices.Objects[0]).Count;
+  Debug('PrimaryIndex count:  %d',[C]);
   TextIO.WriteLn(C);
   for I := 0 to pred(C) do
-    TAMIndex(Indices.Objects[0]).Items[I].Store(TextIO);
+    begin
+      TAMIndex(Indices.Objects[0]).Items[I].Store(TextIO);
+      Debug('Items[%d]',[I]);
+    end;
 end;
 
 { TAMIndex }
@@ -633,10 +687,10 @@ begin
   else
     case Kind of
       dbfExact : Result := -1;
-      //dbfFirst : Result := 0;
-      //dbfLast  : Result := pred(Count);
-      dbfFirst : Result := pred(Count);
-      dbfLast  : Result := 0;
+      dbfFirst : Result := 0;
+      dbfLast  : Result := pred(Count);
+      //dbfFirst : Result := pred(Count);
+      //dbfLast  : Result := 0;
     end;
     //Result := -1;
 end;
@@ -868,16 +922,60 @@ function TAMIndex.SetRange(Low, High: TAMPersists): Integer;
 var
   NotEmpty : Boolean;
 begin
-  //Debug('TAMIndex.SetRange');
+  Debug('TAMIndex.SetRange');
   vLow := BinarySearch( Low, dbfFirst );
   vHigh := BinarySearch( High, dbfLast );
-  //Debug('TAMIndex.SetRange %d .. %d done',[vLow,vHigh]);
+  Debug('TAMIndex.SetRange %d .. %d done',[vLow,vHigh]);
   NotEmpty := (vHigh >= vLow) and (vHigh >= 0) and (vLow >= 0);
   if NotEmpty then
     Result := vHigh - vLow + 1
   else
     Result := 0;
   //Debug('TAMIndex.SetRange %d done',[ord(Result)]);
+end;
+
+procedure TAMIndex.Sort;
+var
+  I, J : Integer;
+  Lowest, Highest : Integer;
+  Odd : Boolean;
+  Swap : Boolean;
+begin
+  Lowest := 0;
+  Highest := pred( Count );
+  Odd := False;
+  Swap := True;
+  while Swap do
+    begin
+      Swap := False;
+      if Odd then
+        begin
+          for I := pred(Highest) downto Lowest do
+            if Items[I].Compare( Items[I+1], vIndex ) < 0 then
+              begin
+                Exchange( I+1, I );
+                Swap := True;
+              end;
+        end
+      else
+        begin
+          for I := Lowest to pred(Highest) do
+            if Items[I].Compare( Items[I+1], vIndex ) < 0 then
+              begin
+                Exchange( I+1, I );
+                Swap := True;
+              end;
+        end;
+
+    end;
+
+end;
+
+function TAMIndex.Update(Item : TAMPersists) : Integer;
+begin
+  ClearRange;
+  Sort;
+  Result := -1;
 end;
 
 { TPrimaryIndex }

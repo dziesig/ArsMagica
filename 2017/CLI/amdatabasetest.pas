@@ -902,8 +902,8 @@ begin
 end;
 
 initialization
-ObjectFactory.RegisterClass( TTable );
-ObjectFactory.RegisterClass( TTestIndexItem );
+//ObjectFactory.RegisterClass( TTable );
+//ObjectFactory.RegisterClass( TTestIndexItem );
 
 
 end.

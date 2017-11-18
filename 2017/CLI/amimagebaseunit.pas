@@ -532,6 +532,7 @@ begin
 end;
 
 initialization
-  ObjectFactory.RegisterClass( TAMImageBase );
+  //ObjectFactory.RegisterClass( TAMImageBase );
+  AMPersistsFactory.RegisterClass( TAMImageBase );
 end.
 

@@ -50,6 +50,7 @@ type
 
   TAMPersists = class
   private
+    fName : String;
     fOnModify : TNotifyEvent;
     fParent   : TAMPersists;
     fId       : Cardinal;
@@ -70,8 +71,9 @@ type
     procedure CheckStartClass(var FileClass : String; TextIO : TTextIO);
 public
     DebugString : String;
-    constructor Create( aParent : TAMPersists = nil); virtual;
+    constructor Create( aParent : TAMPersists ); virtual;
     constructor Create( TextIO : TTextIO; aParent : TAMPersists = nil ); virtual;
+    constructor Create; virtual;
     destructor  Destroy; override;
     procedure   MakeNew; virtual; // Initialize new instances.  Particularly useful
                                   // for handling reading older versions of the object
@@ -111,6 +113,8 @@ public
     class function IndexName( Idx : Integer ) : String; virtual;
 
     property Version    : Cardinal read GetVersion;
+
+    property    Name : String read fName write fName; // for development only
 
     property Modified   : Boolean read IsModified;
     property Parent     : TAMPersists read fParent write fParent;
@@ -183,7 +187,8 @@ end;
 
 function TAMPersists.Compare(ToItem: TAMPersists; Index: Integer): Integer;
 begin
-  Result := Id - ToItem.Id;
+  Result := -( Id - ToItem.Id );
+  //Debug( '%d := %d - %d',[Result,Id,ToItem.Id] );
   if Index <> 0 then
     raise Exception.CreateFMT('TAMPersists.Compare with index %d (must be zero)',[Index]);
 end;
@@ -221,6 +226,11 @@ begin
   TextIO.Readln(S);             // Read the end of class
   CheckEndClass(S,ClsName, TextIO);     // Assert end of class is correct and of correct format
   UNMODIFY;              // make sure this was NOT modified by the load.
+end;
+
+constructor TAMPersists.Create;
+begin
+  inherited;
 end;
 
 destructor TAMPersists.Destroy;
@@ -312,7 +322,7 @@ class function TAMPersists.Load(TextIO: TTextIO; aParent : TAMPersists ): TAMPer
     //CheckStartClass(S, TextIO);   // Assert they are correct and of correct format
     ClsName := S;
     TextIO.Readln(aVersion);       // Read the Object's version
-    Result := ObjectFactory.MakeObject( ClsName ) as TAMPersists;
+    //Result := ObjectFactory.MakeObject( ClsName ) as TAMPersists;
     Result.Parent := aParent;
     Result.fVersion := aVersion;  // This sets the version of the newly created object.
     //Result.Read( TextIO, aVersion );

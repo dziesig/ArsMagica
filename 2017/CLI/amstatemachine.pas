@@ -573,8 +573,8 @@ end;
 //    Result := nil;
 //end;
 
-initialization
-  ObjectFactory.RegisterClass( TFiniteStateMachine );
+//initialization
+//  ObjectFactory.RegisterClass( TFiniteStateMachine );
 
 end.
 
