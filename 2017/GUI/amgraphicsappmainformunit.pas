@@ -165,7 +165,8 @@ var
 implementation
 
 uses
-  AMAppUtils, AMMessages, AMDebug, AMFormUtils, AMObjectFactory;
+  AMAppUtils, AMMessages, AMDebug, AMFormUtils, AMObjectFactory,
+  CQWorldUnit;
 
 {$R *.lfm}
 
@@ -196,7 +197,7 @@ end;
 
 procedure TMainForm.BeforeExit;
 begin
-  Debug( 'TMainForm.BeforeExit was abstract' );
+  //Debug( 'TMainForm.BeforeExit was abstract' );
 end;
 
 function TMainForm.BeforeNew : Boolean;
@@ -283,11 +284,9 @@ begin
       if BeforeNew then
         begin
           PData^.Free;
-          Debug( 'Creating new version of %s',[DataClass.ClassName]);
-          PData^ := DataClass.Create as TAMPersists;
-          //PData^ := ObjectFactory.MakeObject( DataClass.ClassName ) as TAMPersists;
+          //Debug( 'Creating new version of %s',[DataClass.ClassName]);
+          PData^ := AMPersistsFactory.MakeObject( DataClass.ClassName );
           PData^.MakeNew;
-          //Data.New;
           AfterNew;
           DataToControls;
           FilePath := NoFile;
@@ -314,7 +313,7 @@ var
           PData^.Free;
         TextIO := TTextIO.Create( OpenDialog1.FileName, False );
         PData^ := AMPersistsFactory.MakeObject( TextIO, DataClass.ClassName );
-        Debug( PData^.ToString );
+        //Debug( PData^.ToString );
         TextIO.Free;
         DataToControls;
         FilePath := OpenDialog1.FileName;
@@ -343,7 +342,7 @@ begin
     end
   else
     DoOpen;
-  Debug( 'FileOpenActionExecute' );
+  //Debug( 'FileOpenActionExecute' );
 end;
 
 procedure TMainForm.FilePreferencesActionExecute(Sender: TObject);
