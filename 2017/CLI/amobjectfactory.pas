@@ -31,25 +31,6 @@ uses
 
 type
 
-  TMagicClassArray = array of TClass;
-
-  { TObjectFactory }
-
-  //TObjectFactory = class
-  //private
-  //  function GetCount: Integer;
-  //protected
-  //  public
-  //  fClassList : TMagicClassArray;
-  //public
-  //  constructor Create;
-  //  procedure   Clear;
-  //  procedure   RegisterClass( aClass : TClass );
-  //  function    MakeObject( aName : String ) : TObject;
-  //  property    Count : Integer read GetCount;
-  //  property    ClassList : TMagicClassArray read fClassList;
-  //end;
-
   { TAMPersistsMapping }
 
   TAMPersistsMapping = class
@@ -63,9 +44,9 @@ type
     property Name : String read GetName;
   end;
 
-  { TAMPersistsFactory }
+  { TAMObjectFactory }
 
-  TAMPersistsFactory = class( TStringList )
+  TAMObjectFactory = class( TStringList )
   public
     constructor Create;
     destructor  Destroy; override;
@@ -78,8 +59,7 @@ type
   end;
 
 var
-  //ObjectFactory : TObjectFactory;
-  AMPersistsFactory : TAMPersistsFactory;
+  ObjectFactory : TAMObjectFactory;
 
 implementation
 
@@ -99,9 +79,9 @@ begin
   Result := fPersistsClass.ClassName;
 end;
 
-{ TAMPersistsFactory }
+{ TAMObjectFactory }
 
-constructor TAMPersistsFactory.Create;
+constructor TAMObjectFactory.Create;
 begin
   inherited;
   Sorted := True;
@@ -110,12 +90,12 @@ begin
   OwnsObjects := True;
 end;
 
-destructor TAMPersistsFactory.Destroy;
+destructor TAMObjectFactory.Destroy;
 begin
   inherited Destroy;
 end;
 
-function TAMPersistsFactory.MakeObject(aName : String) : TAMPersists;
+function TAMObjectFactory.MakeObject(aName : String) : TAMPersists;
 var
   I : Integer;
   vPersistsClass : TAMPersistsClass;
@@ -129,7 +109,7 @@ begin
   //Debug('Object:  %s',[Result.ToString]);
 end;
 
-function TAMPersistsFactory.MakeObject(aClass : TClass) : TAMPersists;
+function TAMObjectFactory.MakeObject(aClass : TClass) : TAMPersists;
 var
   I : Integer;
   vPersistsClass : TAMPersistsClass;
@@ -145,7 +125,7 @@ begin
   //Debug('Object:  %s',[Result.ToString]);
 end;
 
-function TAMPersistsFactory.MakeObject(TextIO : TTextIO; aName : String
+function TAMObjectFactory.MakeObject(TextIO : TTextIO; aName : String
   ) : TAMPersists;
 var
   I : Integer;
@@ -160,7 +140,7 @@ begin
   //Debug('Object:  %s',[Result.ToString]);
 end;
 
-function TAMPersistsFactory.MakeObject(TextIO : TTextIO; aClass : TClass
+function TAMObjectFactory.MakeObject(TextIO : TTextIO; aClass : TClass
   ) : TAMPersists;
 var
   I : Integer;
@@ -177,7 +157,7 @@ begin
   Debug('Object:  %s',[Result.ClassName]);
 end;
 
-procedure TAMPersistsFactory.RegisterClass(aClass : TAMPersistsClass);
+procedure TAMObjectFactory.RegisterClass(aClass : TAMPersistsClass);
 var
   vPersistsMapping : TAMPersistsMapping;
 begin
@@ -185,52 +165,12 @@ begin
   AddObject(vPersistsMapping.Name, vPersistsMapping);  //S := aClass.ClassName;
 end;
 
-{ TObjectFactory }
-
-//function TObjectFactory.GetCount: Integer;
-//begin
-//  Result := Length(fClassList);
-//end;
-//
-//constructor TObjectFactory.Create;
-//begin
-//  SetLength(fClassList,0);
-//end;
-//
-//procedure TObjectFactory.Clear;
-//begin
-//  SetLength(fClassList,0);
-//end;
-//
-//procedure TObjectFactory.RegisterClass(aClass: TClass);
-//begin
-//  //Debug( 'TObjectFactory.RegisterClass: [%s]',[aClass.ClassName] );
-//  SetLength(fClassList,Length(fClassList) + 1);
-//  fClassList[Length(fClassList)-1] := aClass;
-//end;
-//
-//function TObjectFactory.MakeObject(aName: String): TObject;
-//var
-//  I : Integer;
-//  aClassName : String; // For Debug
-//begin
-//  for I := 0 to pred(Length(fClassList)) do
-//    begin
-//      aClassName := fClassList[I].ClassName;
-//      if aClassName = aName then
-//        begin
-//          Result := fClassList[I].Create;
-//          exit;
-//        end;
-//    end;
-//  raise Exception.Create(aName + ' not found in Object Factory');
-//end;
 
 initialization
   //ObjectFactory := TObjectFactory.Create;
-  AMPersistsFactory := TAMPersistsFactory.Create;
+  ObjectFactory := TAMObjectFactory.Create;
 finalization
   //ObjectFactory.Free;
-  AMPersistsFactory.Free;
+  ObjectFactory.Free;
 end.
 

@@ -704,11 +704,11 @@ begin
 end;
 
 initialization
-  //ObjectFactory.RegisterClass( TAMBooleanImage );
-  //ObjectFactory.RegisterClass( TAMDoubleImg );
-  //ObjectFactory.RegisterClass( TAMShortIntImage );
-  AMPersistsFactory.RegisterClass( TAMBooleanImage );
-  AMPersistsFactory.RegisterClass( TAMDoubleImg );
-  AMPersistsFactory.RegisterClass( TAMShortIntImage );
+  ObjectFactory.RegisterClass( TAMBooleanImage );
+  ObjectFactory.RegisterClass( TAMDoubleImg );
+  ObjectFactory.RegisterClass( TAMShortIntImage );
+  //AMObjectFactory.RegisterClass( TAMBooleanImage );
+  //AMObjectFactory.RegisterClass( TAMDoubleImg );
+  //AMObjectFactory.RegisterClass( TAMShortIntImage );
 end.
 

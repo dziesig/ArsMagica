@@ -285,7 +285,7 @@ begin
         begin
           PData^.Free;
           //Debug( 'Creating new version of %s',[DataClass.ClassName]);
-          PData^ := AMPersistsFactory.MakeObject( DataClass.ClassName );
+          PData^ := ObjectFactory.MakeObject( DataClass.ClassName );
           PData^.MakeNew;
           AfterNew;
           DataToControls;
@@ -312,7 +312,7 @@ var
         if Assigned( PData^ ) then //FreeAndNil( Data );
           PData^.Free;
         TextIO := TTextIO.Create( OpenDialog1.FileName, False );
-        PData^ := AMPersistsFactory.MakeObject( TextIO, DataClass.ClassName );
+        PData^ := ObjectFactory.MakeObject( TextIO, DataClass.ClassName );
         //Debug( PData^.ToString );
         TextIO.Free;
         DataToControls;

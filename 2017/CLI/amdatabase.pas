@@ -511,7 +511,7 @@ begin
           //Item := T(T.Load(TextIO) );
           N := TextIO.ReadAhead;
           N := Copy(N,2,Length(N)-2);
-          Item := T( AMPersistsFactory.MakeObject( TextIO, N ));
+          Item := T( ObjectFactory.MakeObject( TextIO, N ));
           Item.Id := 0;
           Add( Item );
           //Item.Free;
